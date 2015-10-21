@@ -4,4 +4,203 @@
 \setcounter{section}{2}
 \begin{document}
   \section{マトロイドと束}
+    \plainpar{}{
+      基族，階数函数，閉包演算子，周族と異なり，
+      平坦集合族に関してはもとのマトロイドに依らない公理らしい定式化がここまで為されていなかった．
+      この章では，平坦集合族に関する性質を束によって見ていく．
+    }
+    \subsection{束論}
+      \plainpar{}{
+        まずは基礎的な束に関する定義と性質を掲げる．
+      }
+      \defpar{半順序}{
+        集合 $P$ と $P$ 上の二項関係 $\pord$ が
+        \begin{align}
+        \tag{\textsc{Refl}}\label{axiom:refl}
+          \forallin[1]{x}{P}{x \pord x}
+        \\
+        \tag{\textsc{AntiSym}}\label{axiom:antisym}
+          \forallin[1]{x|y}{P}{\lflimpl{\lfland{x \pord y}{y \pord x}}{x = y}}
+        \\
+        \tag{\textsc{Trans}}\label{axiom:trans}
+          \forallin[1]{x|y|z}{P}{\lflimpl{\lfland{x \pord y}{y \pord z}}{x \pord z}}
+        \end{align}
+        を満たすとき，$\pord$ を $P$ 上の\newwordjaen{半順序}{partial order}と呼び，
+        $\seqprn{P, \pord}$ を\newwordjaen{半順序集合}{partially ordered set}と呼ぶ．
+        なお，\eqref{axiom:refl}を\newwordjaen{反射律}{reflexivity}，
+        \eqref{axiom:antisym}を\newwordjaen{反対称律}{antisymmetry}，
+        \eqref{axiom:trans}を\newwordjaen{推移律}{transitivity}と呼ぶ．
+      }
+      \complpar{}{
+        半順序集合とは台集合に主眼をあてた名称で，集合と二項関係の組である．
+      }
+      \defpar{被覆}{
+        半順序集合 $\seqprn{P, \pord}$ に於いて
+        \begin{align*}
+          y \covered x \iff \lfland{y \pord x}{\forallin{z}{P}{\lflimpl{y \pord z \pord x}{\lflor{z = y}{z = x}}}}
+        \end{align*}
+        で $P$ 上の二項関係 $\covered$ を定義し，$y \covered x$ が成り立つとき，$x$ が $y$ を\newwordjaen{被覆する}{cover}という．
+      }
+      \defpar{区間}{
+        半順序集合 $\seqprn{P, \pord}$ と $a, b \in P$ に対し，
+        \begin{align*}
+          \latintvl{a}{b} \defeq \setprnsep{x \in P}{a \pord x \pord b}
+        \end{align*}
+        で定められる集合 $\latintvl{a}{b}$ を $a$ から $b$ への\newwordjaen{区間}{interval}と呼ぶ．
+      }
+      \complpar{}{
+        通常の不等号と同様に，$a \pord x$ かつ $x \pord b$ を $a \pord x \pord b$ と書く．
+      }
+      \defpar{最小元，最大元}{
+        半順序集合 $\seqprn{P, \pord}$ に対し，$\bot \in P$ が
+          $\forallin{x}{P}{\bot \pord x}$
+        を満たすとき，$\bot$ を $P$ の\newwordjaen{最小元}{minimum element}と呼ぶ．また，
+        $\top \in P$ が
+          $\forallin{x}{P}{x \pord \top}$
+        を満たすとき，$\top$ を $P$ の\newwordjaen{最大元}{maximum element}と呼ぶ．
+      }
+      \complpar{}{
+        最大元および最小元は，存在するとは限らないが，
+        存在するならばそれぞれ一意的であることは定義から簡単にわかる．
+      }
+      \defpar{束}{
+        集合 $L$ と $\funcdoms{\paren{\join}}{L \times L}{L}$，$\funcdoms{\paren{\meet}}{L \times L}{L}$ が
+        \begin{align}
+        \tag{$\join$-\textsc{Comm}}\label{axiom:join-comm}
+          \forallin[1]{x|y}{L}{x \join y = y \join x}
+        \\
+        \tag{$\meet$-\textsc{Comm}}\label{axiom:meet-comm}
+          \forallin[1]{x|y}{L}{x \meet y = y \meet x}
+        \\
+        \tag{$\join$-\textsc{Assoc}}\label{axiom:join-assoc}
+          \forallin[1]{x|y|z}{L}{x \join \paren{y \join z} = \paren{x \join y} \join z}
+        \\
+        \tag{$\meet$-\textsc{Assoc}}\label{axiom:meet-assoc}
+          \forallin[1]{x|y|z}{L}{x \meet \paren{y \meet z} = \paren{x \meet y} \meet z}
+        \\
+        \tag{$\join$-\textsc{Absorb}}\label{axiom:join-absorb}
+          \forallin[1]{x|y}{L}{x \join \paren{x \meet y} = x}
+        \\
+        \tag{$\meet$-\textsc{Absorb}}\label{axiom:meet-absorb}
+          \forallin[1]{x|y}{L}{x \meet \paren{x \join y} = x}
+        \end{align}
+        を満たすとき，$\join$ を\newwordjaen{結び}{join}，$\meet$ を\newwordjaen{交わり}{meet}と呼び，
+        $\seqprn{L, \join, \meet}$ を\newwordjaen{束}{lattice}と呼ぶ．
+        なお，\eqref{axiom:join-comm}と\eqref{axiom:meet-comm}を\newwordjaen{交換律}{commutativity}，
+        \eqref{axiom:join-assoc}と\eqref{axiom:meet-assoc}を\newwordjaen{結合律}{associativity}，
+        \eqref{axiom:join-absorb}と\eqref{axiom:meet-absorb}を\newwordjaen{吸収律}{absorbance}と呼ぶ．
+      }
+      \lempar{束の冪等律}{
+        束 $\seqprn{L, \join, \meet}$ に於いて，$\join$ と $\meet$ はそれぞれ冪等律を満たす．すなわち
+        \begin{align}
+        \tag{$\join$-\textsc{Idemp}}
+          \forallin{x}{L}{x \join x = x}
+        \\
+        \tag{$\meet$-\textsc{Idemp}}
+          \forallin{x}{L}{x \meet x = x}
+        \end{align}
+        が成り立つ．
+      }
+      \lempar{}{
+        束 $\seqprn{L, \join, \meet}$ に対し，
+        \begin{align*}
+          x \pord y \iff x = x \join y
+        \end{align*}
+        で $L$ 上の二項関係 $\pord$ を定めると，$\seqprn{L, \pord}$ は半順序集合をなす．
+      }
+      \plainpar{}{
+        以降，束 $\seqprn{L, \join, \meet}$ を上の補題で定義される半順序 $\pord$ を添えて
+        $\seqprn{L, \join, \meet; \pord}$ とも書いてよいものとする．
+      }
+      \lempar[lem:half-distr]{片側分配律}{
+        束 $\Lat = \seqprn{L, \join, \meet; \pord}$ に対し，
+        \begin{align*}
+          \forallin[1]{x|y|z}{L}{x \join \paren{y \meet z} \pord \paren{x \join y} \meet \paren{x \join z}}
+        \\
+          \forallin[1]{x|y|z}{L}{\paren{x \meet y} \join \paren{x \meet z} \pord x \meet \paren{y \join z}}
+        \end{align*}
+        が成り立つ．
+      }
+      \defpar{束の同型}{
+        束 $\Lat_{1} = \seqprn{L_{1}, \joinsub{1}, \meetsub{1}}$ と $\Lat_{2} = \seqprn{L_{2}, \joinsub{2}, \meetsub{2}}$ に対して
+        \begin{align*}
+          \existsisom{\phi}{L_{1}}{L_{2}}{\forallin{x|y}{L_{1}}{
+            \lfland{
+              \app{\phi}{x} \joinsub{2} \app{\phi}{y} = x \joinsub{1} y
+            }{
+              \app{\phi}{x} \meetsub{2} \app{\phi}{y} = x \meetsub{1} y
+            }
+          }}
+        \end{align*}
+        が成り立つとき，$\Lat_{1}$ と $\Lat_{2}$ は\newwordjaen{同型}{isomorphic}であるという．
+      }
+      \defpar{分配束}{
+        束 $\Lat = \seqprn{L, \join, \meet; \pord}$ が
+        \begin{align*}
+          \forallin[1]{x|y|z}{L}{\paren{x \join y} \meet \paren{x \join z} \pord x \join \paren{y \meet z}}
+        \\
+          \forallin[1]{x|y|z}{L}{x \meet \paren{y \join z} \pord \paren{x \meet y} \join \paren{x \meet z}}
+        \end{align*}
+        を満たすとき，$\Lat$ を\newwordjaen{分配束}{distributive lattice}と呼ぶ．
+      }
+      \plainpar{}{
+        補題\ref{lem:half-distr}より，分配束とは結局\newwordjaen{分配律}{distributivity}すなわち
+        \begin{align}
+        \tag{$\join$-\textsc{Distr}}\label{axiom:join-distr}
+          \forallin[1]{x|y|z}{L}{\paren{x \join y} \meet \paren{x \join z} = x \join \paren{y \meet z}}
+        \\
+        \tag{$\meet$-\textsc{Distr}}\label{axiom:meet-distr}
+          \forallin[1]{x|y|z}{L}{x \meet \paren{y \join z} = \paren{x \meet y} \join \paren{x \meet z}}
+        \end{align}
+        を満たす束である．
+      }
+      \defpar{モジュラ束}{
+        束 $\Lat = \seqprn{L, \join, \meet}$ が\newwordjaen{モジュラ律}{modularity}すなわち
+        \begin{align}
+        \tag{\textsc{Mod}}
+          \forallin{x|y|z}{L}{\lflimpl{z \pord x}{x \meet \paren{y \join z} = \paren{x \meet y} \join z}}
+        \end{align}
+        を満たすとき，$\Lat$ を\newwordjaen{モジュラ束}{modular lattice}と呼ぶ．
+      }
+      \defpar{半モジュラ束}{
+        束 $\Lat = \seqprn{L, \join, \meet; \pord}$ が\newwordjaen{半モジュラ律}{semimodularity}すなわち
+        \begin{align}
+        \tag{\textsc{SemiMod}}
+          \forallin{x|y}{L}{
+            \lflimpl{\lfland{x \meet y \covered x}{x \meet y \covered y}}{\lfland{x \covered x \join y}{y \covered x \join y}}
+          }
+        \end{align}
+        を満たすとき，$\Lat$ を\newwordjaen{半モジュラ束}{semimodular lattice}と呼ぶ．
+      }
+      \lempar{}{
+        分配束はモジュラ束である．
+      }
+      \lempar{}{
+        モジュラ束は半モジュラ束である．
+      }
+    % ----
+    \subsection{平坦集合族の束}
+      \thmpar{}{
+        マトロイド $M = \seqprn{S, \Indset}$ の閉包演算子 $\funcdoms{\sigma}{\Power{S}}{\Power{S}}$ と
+        平坦集合族 $\Flat \subseteq \Power{S}$ を用いて
+        \begin{align*}
+          X \join Y &\defeq \app{\sigma}{X \cup Y}
+        \\
+          X \meet Y &\defeq X \cap Y
+        \end{align*}
+        で $\funcdoms{\paren{\join}}{\Flat \times \Flat}{\Power{S}}$ と
+        $\funcdoms{\paren{\meet}}{\Flat \times \Flat}{\Power{S}}$ を定めると，$\seqprn{\Flat, \join, \meet}$ は束をなす．
+      }
+      \proof{}{
+        演算 $\join$ と $\meet$ が $\Flat$ について閉じていること，すなわち任意の $X, Y \in \Flat$ に対して
+        $X \join Y \in \Flat$ かつ $X \meet Y \in \Flat$ であることは，それぞれ
+        補題\ref{lem:flatness-of-closure}と補題\ref{lem:intersection-saves-flatness}よりすぐに導かれる．
+        また，交換律\eqref{axiom:join-comm}，\eqref{axiom:meet-comm}および交わりの結合律\eqref{axiom:meet-assoc}は
+        定義より明らかであるから，残りの\eqref{axiom:join-assoc}，\eqref{axiom:join-absorb}，\eqref{axiom:meet-absorb}について示す．
+        補題\ref{lem:closure-as-intersection}より，$X, Y \in \Flat$ に対して
+        \begin{align*}
+          X \join Y &= \bigcap \setprnsep{F \in \Flat}{X \cup Y \subseteq F}
+        \end{align*}
+        であることを用いる．
+      }
 \end{document}

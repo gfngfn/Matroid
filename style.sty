@@ -62,7 +62,7 @@
   \newdimen\gfn@dimen@equal
   \settowidth{\gfn@dimen@equal}{${}={}$}
   \def\eqdots{\text{\smash{\raisebox{0.25em}{\parbox{\gfn@dimen@equal}{\centering$\vdots$}}}}}
-  \def\newwordjaen#1#2{\textsf{#1}(\textsf{#2})}
+  \def\newwordjaen#1#2{\textsf{#1}\hspace{\xkanjiskip}\raisebox{0.1em}{\small (#2)}\hspace{\xkanjiskip}}
   \def\Natleq#1{\text{Åy}#1\text{Åz}}
   \def\Natintvl#1#2{\text{Åy}#1, #2\text{Åz}}
 % ---- set ----
@@ -157,8 +157,8 @@
   \def\pordsub#1{\mathrel{\text{\raisebox{-0em}{$\smash{\overset{#1}{\rule{0pt}{0.4em}\smash{\pord}}}$}}}}
   \def\covers{\mathrel{\hskip0.25em\relax\rule[0em]{0.5pt}{0.5em}\hskip-0.41em\relax\succ}}
   \def\coverssub#1{\mathrel{\text{\raisebox{-0em}{$\smash{\overset{#1}{\rule{0pt}{0.4em}\smash{\covers}}}$}}}}
-  \def\meetsub#1{\mathbin{\overset{\smash{\text{\raisebox{-0.125em}{$#1$}}}}{\meet}}}
-  \def\joinsub#1{\mathbin{\overset{\smash{\text{\raisebox{-0.125em}{$#1$}}}}{\join}}}
+  \def\meetsub#1{\mathbin{\underset{\smash{\text{\raisebox{0.125em}{$#1$}}}}{\meet}}}
+  \def\joinsub#1{\mathbin{\underset{\smash{\text{\raisebox{0.125em}{$#1$}}}}{\join}}}
   \let\gfncmd@land=\land
   \def\land{\mathrel{\text{\fontsize{1.2em}{0pt}\selectfont$\gfncmd@land$}}}
   \let\gfncmd@lor=\lor
@@ -180,3 +180,5 @@
   \def\Whirl#1{\mathscr{W}^{#1}}
   \def\contrGraph#1#2{#1\mathbin{|}#2}
 %
+  \def\covered{\mathrel{\prec\hspace{-0.4em}\cdot}}
+  \def\latintvl#1#2{\sqbracket{#1, #2}}
