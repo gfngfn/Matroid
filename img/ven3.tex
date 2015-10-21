@@ -1,0 +1,21 @@
+\begin{tikzpicture}
+  \coordinate (B1C) at (+1, 0);
+  \coordinate (B2C) at (-1, 0);
+  \draw[fill, gray!40] ($(B2C) + (-130:2)$)
+    arc[start angle=-130, end angle=-60, radius=2]
+    arc[start angle=-120, end angle=-20, radius=2]
+    to[out=+150, in=+50] cycle;
+  \draw ($(B2C) + (-130:2)$)
+    arc[start angle=-130, end angle=-60, radius=2]
+    arc[start angle=-120, end angle=-20, radius=2]
+    to[out=+150, in=+50] cycle;
+  \draw (B2C) circle[radius=2];
+  \draw (-2, -2) node[below] {$X$};
+  \draw (+1, 0) circle[radius=2];
+  \draw (+2, -2) node[below] {$Y$};
+  \draw (-1.25, -1.25) node {$U$};
+  \draw (+1.75, -1) node {$V$};
+  \draw (+0, -0.75) node {$P$};
+  \draw (+4, +2) node (W) {$W$};
+  \draw (+1.5, -0.15) -- (W); 
+\end{tikzpicture}

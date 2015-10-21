@@ -1,0 +1,169 @@
+%
+  \def\gfn@unique{\gfn@uniquesub}
+  \def\gfn@end{\gfn@end}
+  \let\@xa=\expandafter
+%
+  \@addtoreset{figure}{section}
+  \def\thefigure{\arabic{section}.\arabic{figure}}
+  \newcounter{subfigure}[figure]
+  \def\thesubfigure{%
+    \expandafter\the\expandafter\c@section\expandafter.%
+      \expandafter\gfn@succ\expandafter{\the\c@figure}(\alph{subfigure})%
+  }
+  \def\subfigure{(\refstepcounter{subfigure}\alph{subfigure})}
+  \def\gfn@succ#1{\expandafter\gfn@succmain\expandafter{\romannumeral-`>\gfn@rev{#1}{}}}
+  \def\gfn@idem#1{#1}
+  \def\gfn@gobble#1{}
+  \def\gfn@gobbleandone#1{1}
+  \def\gfn@rev#1{\csname gfn@\ifnum1<1#1idem\else gobble\fi\endcsname{\gfn@revsub#1\gfn@end}}
+  \def\gfn@revsub#1#2\gfn@end{\gfn@rev{#2}#1}
+  \def\gfn@succmain#1{\gfn@succmainsub#1\gfn@end}
+  \def\gfn@succmainsub#1#2\gfn@end{\csname gfn@case#1\endcsname{#2}}
+  \expandafter\def\csname gfn@case0\endcsname#1{\gfn@rev{#1}1}
+  \expandafter\def\csname gfn@case1\endcsname#1{\gfn@rev{#1}2}
+  \expandafter\def\csname gfn@case2\endcsname#1{\gfn@rev{#1}3}
+  \expandafter\def\csname gfn@case3\endcsname#1{\gfn@rev{#1}4}
+  \expandafter\def\csname gfn@case4\endcsname#1{\gfn@rev{#1}5}
+  \expandafter\def\csname gfn@case5\endcsname#1{\gfn@rev{#1}6}
+  \expandafter\def\csname gfn@case6\endcsname#1{\gfn@rev{#1}7}
+  \expandafter\def\csname gfn@case7\endcsname#1{\gfn@rev{#1}8}
+  \expandafter\def\csname gfn@case8\endcsname#1{\gfn@rev{#1}9}
+  \expandafter\def\csname gfn@case9\endcsname#1{%
+    \csname\ifnum1<1#1 gfn@idem\else gfn@gobbleandone\fi\endcsname{\gfn@succmain{#1}}0%
+  }
+%
+  \setlength{\parskip}{1em}
+%
+  \def\textprime{${}^\prime$}
+  \def\booktitle#1{\textit{#1}}
+  \def\numbering#1#2#3{#1.#2.#3.}
+  \def\refnumbering#1#2#3{\numbering{#1}{#2}{#3}}
+  \def\subnumbering#1{\thesubsection(#1)}
+  \def\newwordjaen#1#2{\textsf{#1}\ifx\gfn@unique#2\gfn@unique\else(\textsf{#2})\fi}
+  \def\subproof#1#2{\par\noindent\textsf{[#1]}\quad#2}
+  \def\caseif#1{\paren{\text{if}\enskip #1}}
+  \def\caseow{\paren{\text{otherwise}}}
+  \def\anonymfuncin#1#2#3{\paren{\bar{\lambda}#1\in#2.\enskip#3}}
+  \def\idem{\mathrm{id}}
+  \def\dummysign{\text{\textbf{--}}}
+  \newdimen\gfn@dimen@equal
+  \settowidth{\gfn@dimen@equal}{${}={}$}
+  \def\eqdots{\text{\smash{\raisebox{0.25em}{\parbox{\gfn@dimen@equal}{\centering$\vdots$}}}}}
+  \def\newwordjaen#1#2{\textsf{#1}(\textsf{#2})}
+  \def\Natleq#1{\text{y}#1\text{z}}
+  \def\Natintvl#1#2{\text{y}#1, #2\text{z}}
+% ---- set ----
+  \def\setmns{\setminus}
+  \def\symdiff{\mathrel{\triangle}}
+  \def\funcimg#1#2{#1\sqbracket{#2}}
+  \def\funcinvimg#1#2{#1^{-1}\sqbracket{#2}}
+  \def\minl{\mathop{\mathrm{minl}}}
+  \def\maxl{\mathop{\mathrm{maxl}}}
+% ---- vector space ----
+  \def\veczero{\bm{0}}
+  \def\vecx{\bm{x}}
+  \def\vecy{\bm{y}}
+% ---- graph ----
+  \def\edtovtx{\partial}
+  \def\Edgeof#1{\app{\mathrm{E}}{#1}}
+  \def\Vertexof#1{\mathrm{V}\sqbracket{#1}}
+  \def\Vertexgenby#1{\mathrm{V}\paren{#1}}
+  \def\Bipartite#1#2#3{\app{\rmDelta}{#1, #2; #3}}
+  \def\connectrel{\sim}
+  \def\rmvtx{\setminus}
+% ---- matroid ----
+  \def\Indset{\mathscr{I}}
+  \def\Base{\mathscr{B}}
+  \def\Baseof#1{\app{\Base}{#1}}
+  \def\Circuit{\mathscr{C}}
+  \def\Circuitof#1{\app{\Circuit}{#1}}
+  \def\dependson{\sim}
+  \def\notdependson{\not\sim}
+  \def\Flatof#1{\mathop{\mathrm{Flat}}#1}
+  \def\mparallel#1{\mathbin{\smash{\text{\raisebox{0.2zh}{$\underset{#1}{\parallel}$}}}}}
+  \def\FundCircuit#1#2{\mathrm{C}\paren{#1, #2}}
+%
+  \def\rankof#1{\rho\sqbracket{#1}}
+%  \def\isloop#1#2{\mathop{\smash{\text{\raisebox{0.2zh}{$\underset{#1}{\circlearrowleft}$}}}}#2}
+%  \def\iscoloop#1#2{\mathop{\smash{\text{\raisebox{0.2zh}{$\underset{#1}{\circlearrowleft^{*}}$}}}}#2}
+  \def\isloop#1#2{\mathop{\circlearrowleft\rule[-0.25em]{0pt}{1em}\hskip-0.35em\relax}\nolimits_{#1}#2}
+  \def\iscoloop#1#2{\mathop{\circlearrowleft^{*}\rule[-0.25em]{0pt}{1em}\hskip-0.75em\relax}\nolimits_{#1}#2}
+%
+  \def\famF{\mathscr{F}}
+  \def\famA{\mathscr{A}}
+%
+  \def\Matof#1{\app{\mathrm{M}}{#1}}
+  \def\Cocycleof#1{\app{\mathscr{C}^{*}}{#1}}
+  \def\CcMatof#1{\app{\mathrm{M}^{*}}{#1}}
+  \def\cMatof#1{\app{\mathrm{M}}{#1}}
+  \def\FundCircuit#1#2{\app{\mathrm{C}}{#1, #2}}
+  \def\restrMat#1#2{#1\mathbin{|}#2}
+  \def\contrMat#1#2{#1\mathbin{.}#2}
+%
+  \def\Cx{C_{x}}
+  \def\Cz{C_{z}}
+%
+  \def\cnnct#1{%
+    \mathop{\raisebox{-0.25em}{\text{%
+      \begin{tikzpicture}
+        \draw (0, 0) -- (0, 0.75em);
+        \fill (0, 0) circle[radius=2pt];
+        \fill (0, 0.75em) circle[radius=2pt];
+      \end{tikzpicture}
+    }}}#1%
+  }
+  \def\cnnctin#1#2{%
+    \mathop{\raisebox{-0.25em}{\text{%
+      \begin{tikzpicture}
+        \draw (0, 0) -- (0.25em, 0.375em) -- (-0.25em, 0.375em) -- (0, 0.75em);
+        \fill (0, 0) circle[radius=2pt];
+        \fill (0, 0.75em) circle[radius=2pt];
+      \end{tikzpicture}
+    }}}\nolimits_{#1}#2%
+  }
+  \def\gcnnct#1{%
+    \mathop{\raisebox{-0.25em}{\text{%
+      \begin{tikzpicture}
+        \draw (0, 0) -- (-0.5em, 0) -- (-0.5em, 0.75em) -- (0, 0.75em);
+        \fill (0, 0) circle[radius=2pt];
+        \fill (0, 0.75em) circle[radius=2pt];
+      \end{tikzpicture}
+    }}}#1%
+  }
+  \def\relR{\mathrel{R}}
+  \def\relRstar{\mathrel{R^{*}}}
+  \def\quotset#1#2{\slashfrac{#1}{\mathord{#2}}}
+  \def\eqvclass#1#2{\sqbracket{#1}_{#2}}
+%
+  \def\vcutgraph#1#2{#1\setmns#2}
+%
+  \def\dirsum{\oplus}
+  \def\BX{B^{\bullet}}
+  \def\BY{B^{\circ}}
+  \def\Lat{\mathscr{L}}
+  \def\pordsub#1{\mathrel{\text{\raisebox{-0em}{$\smash{\overset{#1}{\rule{0pt}{0.4em}\smash{\pord}}}$}}}}
+  \def\covers{\mathrel{\hskip0.25em\relax\rule[0em]{0.5pt}{0.5em}\hskip-0.41em\relax\succ}}
+  \def\coverssub#1{\mathrel{\text{\raisebox{-0em}{$\smash{\overset{#1}{\rule{0pt}{0.4em}\smash{\covers}}}$}}}}
+  \def\meetsub#1{\mathbin{\overset{\smash{\text{\raisebox{-0.125em}{$#1$}}}}{\meet}}}
+  \def\joinsub#1{\mathbin{\overset{\smash{\text{\raisebox{-0.125em}{$#1$}}}}{\join}}}
+  \let\gfncmd@land=\land
+  \def\land{\mathrel{\text{\fontsize{1.2em}{0pt}\selectfont$\gfncmd@land$}}}
+  \let\gfncmd@lor=\lor
+  \def\lor{\mathrel{\text{\fontsize{1.2em}{0pt}\selectfont$\gfncmd@lor$}}}
+  \def\minelm{\bot}
+  \def\minelmsub#1{\bot_{#1}}
+  \def\Atom{\mathrm{Atom}}
+%
+  \def\Flat{\mathscr{F}}
+  \def\Hyper{\mathscr{H}}
+  \def\Hyperof#1{\Hyper\sqbracket{#1}}
+  \def\cGraphof#1{\mathrm{G}\sqbracket{#1}}
+  \def\latintvl#1#2{\sqbracket{#1, #2}}
+  \def\Bipof#1{\rmDelta\sqbracket{#1}}
+  \def\Latof#1{\Lat\sqbracket{#1}}
+  \def\rmvd#1#2{#1\setmns#2}
+%
+  \def\Wheel#1{\mathscr{W}_{#1}}
+  \def\Whirl#1{\mathscr{W}^{#1}}
+  \def\contrGraph#1#2{#1\mathbin{|}#2}
+%

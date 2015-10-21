@@ -1,0 +1,2730 @@
+\documentclass[leqno]{jsarticle}
+\makeatletter
+  \usepackage[T1]{fontenc}
+  \usepackage{lmodern}
+  \usepackage{amsmath}
+  \usepackage{amssymb}
+  \usepackage{bm}
+  \usepackage{mathrsfs}%(for \mathscr)
+  \usepackage{ascmac}
+  \usepackage[dvipdfmx]{graphicx}
+  \usepackage[dvipdfmx]{xcolor}
+  \usepackage{tikz}
+  \usetikzlibrary{calc}
+%
+  \usepackage{gfncmd}
+  \usefrakPower
+%
+  \usepackage{gfnlf}
+  \useRightarrowaslimpl
+  \useLeftrightarrowaslimpleqv
+  \makeleftparenmandatory{lflimpl}{lfland}
+%
+  \usepackage{gfncls}
+  \setsectiontheme{strongline}
+%
+  \usepackage{gfndecox}
+  \newdecoclass{\defpar}{定義}{ul}{subsubsection}
+  \newdecoclass{\thmpar}{定理}{box}{subsubsection}
+  \newdecoclass{\lempar}{補題}{box}{subsubsection}
+  \newdecoclass{\corpar}{系}{box}{subsubsection}
+  \newnonumberdecoclass{\example}{例}{square}
+  \newnonumberdecoclass{\plainpar}{}{top}
+  \newnonumberdecoclass{\complpar}{補足}{square}
+  \newnonumberdecoclass{\proof}{証明}{topwithbottom}
+%
+  \def\remains{\textcolor{red}{！要加筆！}}
+  \usepackage{style}
+%
+  \def\@listi{%
+    \leftmargin=\leftmargini\relax
+    \topsep=0.5em\relax
+    \partopsep=0em\relax
+    \parsep=0.5em\relax
+    \itemsep=0.5em\relax
+  }
+  \let\@listI=\@listi
+  \@listi
+%
+  \author{\texttt{@bd\string_gfngfn}}
+  \title{マトロイド理論}
+\makeatother
+\begin{document}
+  \maketitle
+  \setlength\parskip{0em}
+  \tableofcontents
+  \setlength\parskip{1em}
+%
+  \section*{はじめに}
+    \plainpar{}{
+      この文書はおおよそ D. J. A. Welsh, \booktitle{Matroid Theory}の流れに基づいてマトロイドの理論を追ったものである．
+      記法は，\booktitle{Matroid Theory}で用いられているものにはできるだけ従っているが，
+      見通しをよくするために独自に拡張したり全く新しく定めたものもある．
+      また用語の日本語訳に於いてもこの文書で独自に定めた表現がある．
+      例えば``circuit''は単に「サーキット」と訳されることが多いが，この文書では「周」と訳している．
+      このほか数式表現における量化と論理演算は，
+      別行立てでは論理式に近い形式表現で，文中では自然言語によってそれぞれ表すようにしている．
+    }
+  \section{準備}
+    \subsection{集合に関して}
+      \plainpar{}{
+        この文書で扱う集合はおおかた有限集合である．
+        したがって，集合について必要以上に公理的に見ることはせず，比較的素朴に扱う方針をとる．
+        $X$ が $Y$ の部分集合であることを $X \subseteq Y$ と書き，しばしば $Y$ が $X$ を包むと言い表す．
+        $X$ の部分集合全体すなわち $X$ の冪集合は $\Power{X}$ と書く．
+        $X \subseteq Y$ かつ $X \neq Y$ であることを $X \subsetneq Y$ と書き，しばしば $Y$ が $X$ を真に包むと言い表す．
+        $X$ と $Y$ の和集合は $X \cup Y$，$X$ と $Y$ の直積は $X \times Y$ と書く．
+        なお，集合 $S$ と述語 $P$ を用いた集合の内包記法 $\setprnsep{x \in S}{\app{P}{x}}$ は分出公理を意識したものである．
+        しばしば左側にも写像 $f$ を用いて $\setprnsep{\app{f}{x}}{\app{P}{x}}$ のように書くが，
+        これは $\setprnsep{y \in \cod f}{\existsin{x}{\dom f}{\lfland{y = \app{f}{x}}{\app{P}{x}}}}$ の略記である．
+      }
+      \defpar{共通部分}{
+        集合 $A$，$B$ に対し，$A \cap B \defeq \setprnsep{x \in A}{x \in B}$ を
+        $A$ と $B$ の\newwordjaen{共通部分}{intersection}と呼ぶ%
+          \footnote{稀に共通部分のことを積集合と呼ぶことがあるが，直積との混同を避けるため使わないことにする．
+          また，和集合も直和との混同を避けてか\newwordjaen{合併}{union}と呼んだりする．}．
+      }
+      \defpar{差，対称差}{
+        集合 $A$，$B$ に対し，
+          $A \setmns B \defeq \setprnsep{x \in A}{x \not\in B}$
+        を $A$ と $B$ の\newwordjaen{差}{difference}或いは\newword{差集合}と呼ぶ．また，
+          $A \symdiff B \defeq \paren{A \setmns B} \cup \paren{B \setmns A}$
+        を $A$ と $B$ の\newwordjaen{対称差}{symmetric difference}と呼ぶ．
+      }
+      \defpar{二項関係}{
+        集合 $A$ と $B$ に対し，$R \subseteq A \times B$ を $A$ と $B$ の上の\newwordjaen{二項関係}{binary relation}と呼ぶ．
+        特に $R \subseteq A \times A$ を $A$ 上の二項関係と呼ぶ．
+        また，$a \in A$ と $b \in B$ に対して二項関係 $R \subseteq A \times B$ が
+        $\seqprn{a, b} \in R$ を満たすとき，これを $a \mathrel{R} b$ と中置演算子に見せかけた糖衣構文で書く．
+      }
+      \defpar{写像}{
+        集合 $A$，$B$，二項関係 $f \subseteq A \times B$ が
+        \begin{align*}
+          \forallin[1]{a}{A}{\existsin{b}{B}{a \mathrel{f} b}}
+        \\
+          \forallin[1]{a}{A}{\forallin{b_{1}|b_{2}}{B}{
+            \lflimpl{\lfland{a \mathrel{f} b_{1}}{a \mathrel{f} b_{2}}}{b_{1} = b_{2}}
+          }}
+        \end{align*}
+        を共に満たすとき，すなわち任意の $a \in A$ に対して $a \mathrel{f} b$ なる $b \in B$ が一意的に存在するとき，
+        $f$ を $A$ から $B$ への\newwordjaen{写像}{map}と呼ぶ．
+        $A$ を $f$ の\newwordjaen{定義域}{domain of definition}或いは\newwordjaen{始域}{domain}，
+        $B$ を $f$ の\newwordjaen{値域}{range}或いは\newwordjaen{終域}{codomain}と呼び，
+        $f$ が $A$ から $B$ への写像であることを $\funcdoms{f}{A}{B}$ と書く．
+        また，写像 $\funcdoms{f}{A}{B}$ と $a \in A$ に対して一意的に存在する $a \mathrel{f} b$ なる $b \in B$ を
+        $\app{f}{a}$ と書く．
+      }
+      \defpar{写像の制限}{
+        写像 $\funcdoms{f}{A}{B}$ と $X \subseteq A$ に対し，
+          \funcdomswidebox{\restrfunc{f}{X}}{X}{B}{x}{\app{f}{x}}
+        で定義される $\restrfunc{f}{X}$ を $f$ の $X$ への\newword{制限}と呼ぶ．
+      }
+      \defpar{像，逆像}{
+        写像 $\funcdoms{f}{A}{B}$ と集合 $X \subseteq A$ に対して
+          $\funcimg{f}{X} \defeq \setprnsep{y \in B}{\existsin{x}{X}{y = \app{f}{x}}}$
+        を $f$ による $X$ の\newwordjaen{像}{image}と呼ぶ．また，
+        写像 $\funcdoms{f}{A}{B}$ と集合 $Y \subseteq B$ に対して
+          $\funcinvimg{f}{Y} \defeq \setprnsep{x \in A}{\app{f}{x} \in Y}$
+        を $f$ による $Y$ の\newwordjaen{逆像}{inverse image}と呼ぶ．
+      }
+      \defpar*{極大・極小集合全体の記法}{
+        集合族 $\famF$ に対し，
+        \begin{align*}
+          \maxl \famF &\defeq \setprnsep{X \in \famF}{\forallin{Y}{\famF}{\lflimpl{Y \supseteq X}{Y = X}}}
+        \\
+          \minl \famF &\defeq \setprnsep{X \in \famF}{\forallin{Y}{\famF}{\lflimpl{Y \subseteq X}{Y = X}}}
+        \end{align*}
+        で $\maxl \famF$，$\minl \famF$ を定める．
+      }
+      \complpar{}{
+        同一の性質を持った集合族 $\famF$ の元のうち包含関係に関して極大であるもの全体が $\maxl \famF$，
+        極小であるもの全体が $\minl \famF$ である．
+      }
+    % ---- ----
+    \subsection{グラフに関して}
+      \plainpar{}{
+        有限個の\newwordjaen{頂点}{vertex}と，
+        それらの頂点のうち順序の区別なくまた重複を許して $2$ 個を結ぶ有限本の\newwordjaen{辺}{edge}からなる図形的構造を
+        \newwordjaen{無向グラフ}{undirected graph}と呼ぶ．
+        “頂点と辺をどのように配置するか”については考慮に入れる場合と入れない場合があるが，
+        入れない場合，“代数的には”次のように定義される．
+      }
+      \defpar{無向グラフ}{
+        有限集合 $V$，$E$ と写像 $\funcdoms{\edtovtx}{E}{\Power{V}}$ が
+        \begin{align*}
+          &\forallin{e}{E}{1 \leq \card{\app{\edtovtx}{e}} \leq 2}
+        \end{align*}
+        を満たすとき，$G = \seqprn{V, E; \edtovtx}$ を
+        \newwordjaen{無向グラフ}{undirected graph}或いは単に\newwordjaen{グラフ}{graph}と呼び，
+        $V$ を $G$ の\newwordjaen{頂点集合}{vertex set}，$E$ を $G$ の\newwordjaen{辺集合}{set of edges}と呼ぶ．
+        また $e \in E$ に対して $v \in V$ が $v \in \app{\edtovtx}{e}$ を満たすとき，$v$ を $e$ の\newwordjaen{端点}{endpoint}と呼ぶ．
+        なお， $\edtovtx$ を意識しなくてよい場合は $G = \seqprn{V, E; \edtovtx}$ を $G = \seqprn{V, E}$ と略記する．
+      }
+      % ----
+      \begin{figure}[htb]
+      \centering
+        \parbox[c]{0.3\textwidth}{\input{img/undirected-graph.tex}}
+        \parbox[c]{0.3\textwidth}{
+          \begin{align*}
+            V &= \setprn{v_{1}, v_{2}, v_{3}}
+          \\
+            E &= \setprn{e_{1}, e_{2}, e_{3}, e_{4}, e_{5}}
+          \\
+            \app{\edtovtx}{e_{1}} &= \setprn{v_{1}, v_{2}}
+          \\
+            \app{\edtovtx}{e_{2}} &= \app{\edtovtx}{e_{3}} = \setprn{v_{2}, v_{3}}
+          \\
+            \app{\edtovtx}{e_{4}} &= \setprn{v_{1}, v_{3}}
+          \\
+            \app{\edtovtx}{e_{5}} &= \setprn{v_{1}}
+          \end{align*}
+        }
+        \caption{グラフの例}\label{fig:undirected-graph}
+      \end{figure}
+      % ----
+      \defpar{隣接性}{
+        グラフ $G = \seqprn{V, E; \edtovtx}$ に於いて $e \in E$ が $\card{\app{\edtovtx}{e}} = 2$ を満たして
+        $\app{\edtovtx}{e} = \setprn{u, v}$ であるとき，$e$ は $u$ と $v$ を\newwordjaen{結ぶ}{joint}という．
+        また，$u \neq v$ なる $u, v \in V$ に対し，$\app{\edtovtx}{e} = \setprn{u, v}$ なる $e \in E$ が存在するとき，
+        $u$ と $v$ は\newwordjaen{隣接している}{adjacent}という．
+      }
+      \defpar{ループ，並行性}{
+        グラフ $G = \seqprn{V, E; \edtovtx}$ に於いて $e \in E$ が $\card{\app{\edtovtx}{e}} = 1$ を満たすとき，
+        $e$ を\newwordjaen{ループ}{loop}と呼ぶ．
+        また，$e_{1}, e_{2} \in E$ が $\app{\edtovtx}{e_{1}} = \app{\edtovtx}{e_{2}}$ かつ
+        $\card{\app{\edtovtx}{e_{1}}} = \card{\app{\edtovtx}{e_{2}}} = 2$ を満たすとき，
+        $e_{1}$ と $e_{2}$ は\newwordjaen{並行している}{parallel}という．
+      }
+      \example{}{
+        グラフの例としては図\ref{fig:undirected-graph}のようなものが挙げられる．
+        $e_{2}$ と $e_{3}$ は並行しており，$e_{5}$ はループである．
+      }
+      \defpar{多重グラフ，単純グラフ}{
+        グラフ $G = \seqprn{V, E; \edtovtx}$ が $\forallin{e}{E}{\card{\app{\edtovtx}{e}} = 2}$ を満たすとき，
+        $G$ を\newwordjaen{多重グラフ}{multigraph}と呼ぶ．
+        さらに，多重グラフ $G = \seqprn{V, E; \edtovtx}$ の $\edtovtx$ が単射であるとき，
+        $G$ を\newwordjaen{単純グラフ}{simple graph}と呼ぶ．
+      }
+      \complpar{}{
+        要するに多重グラフとはループを持たないグラフ，単純グラフとはループを持たずどの $2$ 辺も並行しないグラフである．
+        また，単純グラフでは $\edtovtx$ の単射性より $V$ の $2$ 元部分集合全体 ${V \choose 2}$ を用いて
+        $E \subseteq {V \choose 2}$，$\edtovtx = \idem_{E}$ としてよい．
+        こうすることで端点に $u$ と $v$ を持つ辺 $e$ は $e = \setprn{u, v}$ と表せる．
+        端点の順序は区別しないから，組 $\seqprn{u, v} \in V \times V$ ではなく
+        非順序対 $\setprn{u, v} \in {V \choose 2}$ であることに注意されたい．
+        勿論 ${V \choose 2}$ から $V \times V$ への単射が存在するから
+        $E \subseteq V \times V$ と“広めにとっておく”こともできるが，
+        この場合 $u \neq v$ なる $u,v \in V$ に対して
+        $\seqprn{u, v} \in E$ ならば $\seqprn{v, u} \not\in E$ でなければならないから，扱いが煩雑になる．
+      }
+      \defpar{頂点の次数}{
+        グラフ $G = \seqprn{V, E; \edtovtx}$ に於いて，$v \in V$ に対して
+        \begin{align*}
+          \deg_{G} v
+%            &\defeq \card{\setprnsep{e \in E}{v \in \app{\edtovtx}{e}}}
+%              + \card{\setprnsep{e \in E}{\setprn{v} = \app{\edtovtx}{e}}}
+            &\defeq \card{\setprnsep{e \in E}{\lfland{\card{\app{\edtovtx}{e}} = 2}{v \in \app{\edtovtx}{e}}}}
+              + 2 \cdot \card{\setprnsep{e \in E}{\lfland{\card{\app{\edtovtx}{e}} = 1}{v \in \app{\edtovtx}{e}}}}
+        \end{align*}
+        で定義される $\deg_{G} v$ を $v$ の\newwordjaen{次数}{degree}と呼ぶ．
+        $\deg_{G} v = 0$ なる $v \in V$ は\newwordjaen{孤立している}{isolated}という．
+        また，グラフ $G = \seqprn{V, E; \edtovtx}$ が
+        任意の $u, v \in V$ に対して $\deg_{G} u = \deg_{G} v$ を満たすとき，
+        すなわちすべての頂点の次数が相等しいとき，$G$ を\newwordjaen{正則グラフ}{regular graph}と呼ぶ．
+      }
+      \complpar{}{
+        特に $G = \seqprn{V, E; \edtovtx}$ が多重グラフのときはループがないので，$v \in V$ の次数は
+        \begin{align*}
+          \deg_{G} v &= \card{\setprnsep{e \in E}{v \in \app{\edtovtx}{e}}}
+        \end{align*}
+        である．
+      }
+      \example{}{
+        図\ref{fig:undirected-graph}の各頂点の次数は
+        $\deg_{G} v_{1} = 4$，$\deg_{G} v_{2} = 3$，$\deg_{G} v_{3} = 3$．
+      }
+      \defpar{完全グラフ}{
+        $\card{V} = n$ なる単純グラフ $G = \seqprn{V, E; \edtovtx}$ に対して $E \cong {V \choose 2}$ であるとき，
+        すなわち任意の $2$ 点に対してそれらを結ぶ辺がただ $1$ つ存在するとき，
+        $G$ を\newwordjaen{完全グラフ}{complete graph}と呼び，$K_{n}$ と書く．
+      }
+      \defpar{安定性}{
+        単純グラフ $G = \seqprn{V, E; \edtovtx}$ に於いて $U \subseteq V$ が
+        \begin{align*}
+          \forallin{u|v}{U}{\forallin{e}{E}{\app{\edtovtx}{e} \neq \setprn{u, v}}}
+        \end{align*}
+        を満たすとき，すなわち $U$ のどの $2$ 元も隣接しないとき，
+        $U$ を $G$ の\newwordjaen{安定集合}{stable set}と呼ぶ%
+          \footnote{安定集合を独立集合と呼ぶこともあるが，これはマトロイドに関して使用する全く異なる用語と重複するので避ける．}．
+      }
+      \defpar{二部グラフ}{
+%        \begin{multline*}
+%          \existssub{V_{1}}{V}{
+%            \lfland{
+%              \lfland{V_{1} \neq \varnothing}{V_{1} \neq V}
+%            }{\midbreak
+%              \forallin{e}{E}{
+%                \lfland{
+%                  \forallin{u|v}{V_{1}}{\app{\edtovtx}{e} \neq \setprn{u, v}}
+%                }{
+%                  \forallin{u|v}{V \setmns V_{1}}{\app{\edtovtx}{e} \neq \setprn{u, v}}
+%                }
+%              }
+%            }
+%          }
+%        \end{multline*}
+        単純グラフ $G = \seqprn{V, E; \edtovtx}$ に対し，或る $V_{1} \subseteq V$ が存在して
+        $V_{1}$ と $V \setmns V_{1}$ が共に非空な安定集合であるとき，
+        $G$ を\newwordjaen{二部グラフ}{bipartite graph}と呼ぶ．
+        $G$ が二部グラフで特に上のような $V_{1}$ を明示したいとき，
+        $V_{2} \defeq V \setmns V_{1}$ として $G = \Bipartite{V_{1}}{V_{2}}{E; \edtovtx}$，
+        或いは $\edtovtx$ を省略して $G = \Bipartite{V_{1}}{V_{2}}{E}$ と書く．
+      }
+      \complpar{}{
+        二部グラフは，或る $V_{1} \subseteq V$ が存在して任意の $e \in E$ に対して
+        $\card{\app{\edtovtx}{e} \cap V_{1}} = 1$ が成り立つような単純グラフでもある．
+        上の定義との同値性は直感的にも明らかであり，こちらを定義としてもよい．
+      }
+      \defpar{完全二部グラフ}{
+        $\card{V_{1}} = n_{1}$，$\card{V_{2}} = n_{2}$ なる二部グラフ $G = \Bipartite{V_{1}}{V_{2}}{E; \edtovtx}$ が
+        任意の $v_{1} \in V_{1}$ に対して $\deg_{G} v_{1} = n_{2}$ かつ
+        任意の $v_{2} \in V_{2}$ に対して $\deg_{G} v_{2} = n_{1}$ を満たすとき，
+        $G$ を\newwordjaen{完全二部グラフ}{complete bipartite graph}と呼び，$K_{n_{1}, n_{2}}$ と書く．
+      }
+      \defpar{道}{
+        グラフ $G = \seqprn{V, E; \edtovtx}$ と $n \in \setN$ に対し，
+        頂点の列と辺の列の組
+        $P = \seqprn{\seqprn{v_{i}}_{i = 0}^{n}, \seqprn{e_{i}}_{i = 1}^{n}} \in V^{n + 1} \times E^{n}$ が
+        \begin{align*}
+          \forallin[1]{i}{\Natleq{n}}{\app{\edtovtx}{e_{i}} = \setprn{v_{i - 1}, v_{i}}}
+        \\
+          \forallin[1]{i|j}{\Natleq{n}}{\lflimpl{i \neq j}{e_{i} \neq e_{j}}}
+        \end{align*}
+        を満たすとき，
+        $P$ を $v_{0}$ と $v_{n}$ を\newwordjaen{繋ぐ}{connect}\newwordjaen{長さ}{length} $n$ の\newwordjaen{道}{path}と呼ぶ．
+        また，このとき $v_{0}$ を $P$ の\newwordjaen{始点}{initial vertex}，
+        $v_{n}$ を $P$ の\newwordjaen{終点}{terminal ventex}と呼ぶ．
+      }
+      \complpar{}{
+        定義より，道には同一の辺が複数回現れることはないが，頂点は重複してもよい．また，始点と終点は区別する．
+        その他，特に $v \in V$ に対して $v$ と $v$ を繋ぐ長さ $0$ の道 $\seqprn{\seqprn{v}, \seqprn{}}$ も
+        定義されていることに注意されたい．
+      }
+      \defpar{連結性，連結成分}{
+        グラフ $G = \seqprn{V, E}$ に対し，$V$ 上の二項関係 $\connectrel$ を，
+        $u$ と $v$ を繋ぐ道が $G$ に存在するときに $u \connectrel v$ が成り立つものと定義する．
+        この $\connectrel$ は明らかに同値関係であり，
+        $V$ の $\connectrel$ による同値類の各元を $G$ の\newwordjaen{連結成分}{connected components}と呼ぶ．
+        また，任意の $u, v \in V$ に対して $u \connectrel v$ が成り立つとき，
+        $G$ は\newwordjaen{連結である}{connected}という．
+        連結でないことは\newwordjaen{非連結である}{disconnected}という．
+      }
+      \defpar{部分グラフ，全域部分グラフ，部分グラフの生成}{
+        グラフ $G = \seqprn{V, E; \edtovtx}$ と $V' \subseteq V$ と $E' \subseteq E$ に対して
+        $G' = \seqprn{V', E'; \restrfunc{\edtovtx}{E'}}$ がグラフをなすとき，
+        $G'$ を $G$ の\newwordjaen{部分グラフ}{subgraph}と呼ぶ．
+        $\edtovtx$ を意識しなくてよい場合は，単に $\seqprn{V', E'}$ を $G$ の部分グラフと呼ぶ．
+        また，辺集合がもとのグラフ $G$ の辺集合 $V$ と一致する部分グラフを
+        $G$ の\newwordjaen{全域部分グラフ}{spanning subgraph}と呼ぶ．
+        さらに，辺部分集合 $E' \subseteq E$ に対して
+        \begin{align*}
+          \Vertexgenby{E'} \defeq \setprnsep{v \in V}{\existsin{e}{E'}{v \in \app{\edtovtx}{e}}}
+        \end{align*}
+        で頂点部分集合が定義される部分グラフ $\seqprn{\Vertexgenby{E'}, E'}$ を，
+        $E'$ が\newwordjaen{生成する}{generate} $G$ の部分グラフと呼び，
+        頂点部分集合 $V' \subseteq V$ に対して
+        $G$ から $V'$ の元を端点にもつ辺を除いた，頂点集合を $V'$ とする部分グラフを $G \rmvtx V'$ と書く．
+        すなわち
+        \begin{align*}
+          G \rmvtx V' \defeq \seqprn{V', \setprnsep{e \in E}{\forallin{v}{V'}{v \not\in \app{\edtovtx}{e}}}}
+        \end{align*}
+        である．
+      }
+      \defpar{多重連結性，関節点}{
+        グラフ $G = \seqprn{V, E}$ と $n \in \setNpos$ に対し，
+        任意の $\card{U} < n$ なる $U \subseteq V$ に対して $G \rmvtx U$ が連結であるとき，
+        $G$ は $n$\newwordjaen{-連結}{-connected}であるという．
+        また，連結なグラフ $G = \seqprn{V, E}$ に対し，$v \in V$ が $G \rmvtx \setprn{v}$ を非連結にするとき，
+        $v$ を $G$ の\newwordjaen{関節点}{cut vertex}と呼ぶ．
+      }
+      \defpar{閉路}{
+        グラフ $G = \seqprn{V, E; \edtovtx}$ と $n \in \setNpos$ に対し，
+        $C = \seqprn{\seqprn{v_{i}}_{i = 0}^{n - 1}, \seqprn{e_{i}}_{i = 0}^{n - 1}} \in V^{n} \times E^{n}$ が
+        \begin{align*}
+          \forallin[1]{i|j}{\Natintvl{0}{n - 1}}{\lflimpl{i \neq j}{v_{i} \neq v_{j}}}
+        \\
+          \forallin[1]{i|j}{\Natintvl{0}{n - 1}}{\lflimpl{i \neq j}{e_{i} \neq e_{j}}}
+        \\
+          \forallin[1]{i}{\Natintvl{0}{n - 1}}{\app{\edtovtx}{e_{i}} = \setprn{v_{i}, v_{(i + 1) \bmod n}}}
+        \end{align*}
+        を満たすとき，$C$ を $G$ の\newwordjaen{閉路}{cycle}と呼ぶ．
+        或いは，$C$ からつくられる $G$ の部分グラフ
+          $\seqprn{\setprn{v_{i}}_{i = 0}^{n - 1}, \setprn{e_{i}}_{i = 0}^{n - 1}}$
+        も単に閉路と呼ぶ．
+      }
+      \complpar{}{
+        道と異なり，閉路では辺だけでなく頂点も重複を許容しない．
+      }
+      \defpar{森，木，全域森，全域木}{
+        閉路を持たないグラフを\newwordjaen{森}{forest}と呼び，特に連結な森を\newwordjaen{木}{tree}と呼ぶ．
+        また，グラフ $G$ の全域部分グラフ $T$ が森であるとき，
+        $T$ を $G$ の\newwordjaen{全域森}{spanning forest}と呼び，
+        特に $T$ が連結であるとき，$T$ を $G$ の\newwordjaen{全域木}{spanning tree}と呼ぶ．
+      }
+    % ---- ----
+  \section{マトロイドの基礎}
+    \subsection{マトロイドに関する基礎的概念の定義}
+      \defpar{マトロイド，独立性，従属性}{
+        有限集合 $S$ と部分集合族 $\Indset \subseteq \Power{S}$ が
+        \begin{align*}
+          \tag{I1}\label{axiom:I1}&
+          \varnothing \in \Indset
+        \\
+          \tag{I2}\label{axiom:I2}&
+          \forallin{X}{\Indset}{\forallsub{Y}{X}{Y \in \Indset}}
+        \\
+          \tag{I3}\label{axiom:I3}&
+          \forallin{U|V}{\Indset}{\lflimpl{\card{U} = \card{V} + 1}{
+            \existsin{x}{U \setmns V}{V \cup \setprn{x} \in \Indset}
+          }}
+        \end{align*}
+        を満たすとき，$M = \seqprn{S, \Indset}$ を\newwordjaen{マトロイド}{matroid}と呼ぶ．
+        また，このとき
+        $X \in \Indset$ なる $X \subseteq S$ は $M$ に於いて\newwordjaen{独立である}{independent}といい，
+        $X \not\in \Indset$ なる $X \subseteq S$ は $M$ に於いて\newwordjaen{従属である}{dependent}という．
+      }
+      \defpar{基，基族}{
+        マトロイド $M = \seqprn{S, \Indset}$ に於いて独立な集合のうち，
+        包含関係に関して極大であるものを $M$ の\newwordjaen{基}{base}と呼ぶ．
+        また $M$ の基全体からなる集合，すなわち
+        \begin{align*}
+          \Baseof{M}
+            &\defeq \maxl \Indset
+          \\&= \setprnsep{B \in \Indset}{\forallin{X}{\Indset}{\lflimpl{X \supseteq B}{X = B}}}
+        \end{align*}
+        で定義される $\Baseof{M}$ を $M$ の\newwordjaen{基族}{base family}と呼ぶ．
+      }
+      \defpar{周，周族}{
+        マトロイド $M = \seqprn{S, \Indset}$ に於いて従属な集合のうち，
+        包含関係に関して極小であるものを $M$ の\newwordjaen{周}{circuit}と呼ぶ．
+        また $M$ の周全体からなる集合，すなわち
+        \begin{align*}
+          \Circuitof{M}
+            &\defeq \minl \paren{\Power{S} \setmns \Indset}
+          \\& = \setprnsep{C \in \Power{S} \setmns \Indset}{
+              \forallin{Y}{\Power{S} \setmns \Indset}{\lflimpl{Y \subseteq C}{Y = C}}
+            }
+        \end{align*}
+        で定義される $\Circuitof{M}$ を $M$ の\newwordjaen{周族}{circuit family}と呼ぶ．
+      }
+      \defpar{階数函数}{
+        マトロイド $M = \seqprn{S, \Indset}$ に対し，
+        \funcdomswidebox{\rho}{\Power{S}}{\setN}{A}{\max \setprnsep{\card{X}}{\lfland{X \subseteq A}{X \in \Indset}}}
+        を $M$ の\newwordjaen{階数函数}{rank function}と呼ぶ．
+        また $A \subseteq S$ に対して $\app{\rho}{A}$ を $M$ に於ける $A$ の\newwordjaen{階数}{rank}と呼ぶ．
+        特に $\app{\rho}{S}$ は $M$ の\newwordjaen{階数}{rank}と呼び，しばしば $\app{\rho}{M}$ と書く．
+      }
+      \complpar{}{
+        $A$ に包まれる独立集合のうち最も大きいものの大きさを $A$ の階数と定めている．
+        また，いかなる $A \subseteq S$ に対しても $\varnothing \subseteq A$ かつ $\varnothing \in \Indset$ が
+        成り立つので $0 = \card{\varnothing} \in \setprnsep{\card{X}}{\lfland{X \subseteq A}{X \in \Indset}}$ であり，
+        $\app{\rho}{A}$ が問題なく定義される．
+      }
+      \defpar{平坦性，部分空間}{
+        マトロイド $M = \seqprn{S, \Indset}$ と $F \subseteq S$ が
+        \begin{align*}
+          &\forallin{x}{S \setmns F}{\app{\rho}{F \cup \setprn{x}} = \app{\rho}{F} + 1}
+        \end{align*}
+        を満たすとき，$F$ は $M$ に於いて\newwordjaen{平坦である}{flat}という．
+        或いは $F$ を $M$ の\newwordjaen{部分空間}{subspace}と呼ぶ．
+        また $M$ に於いて平坦な集合全体を $\Flatof{M}$ と書くことにする．すなわち
+        \begin{align*}
+          \Flatof{M}
+            &\defeq \setprnsep{F \subseteq S}{\forallin{x}{S \setmns F}{\app{\rho}{F \cup \setprn{x}} = \app{\rho}{F} + 1}}
+        \end{align*}
+        である．
+      }
+      \complpar{}{
+        感覚的に言えば“外のどんな元を追加しても階数が $1$ 増えてしまうような集合”が平坦集合である．
+        %後述するが，「平坦」という名前は有限ベクトル空間からのアナロジーである．
+      }
+      \defpar{元の部分空間に対する従属性}{
+        マトロイド $M = \seqprn{S, \Indset}$ と $A \subseteq S$， $x \in S$ が
+          $\app{\rho}{A \cup \setprn{x}} = \app{\rho}{A}$
+        を満たすとき，$x$ は $A$ に\newwordjaen{従属する}{depend}といい，$x \dependson A$ と書く．
+      }
+      \defpar{閉包，閉包演算}{
+        マトロイド $M = \seqprn{S, \Indset}$ に対して
+        \funcdomswidebox{\sigma}{\Power{S}}{\Power{S}}{A}{\setprnsep{x \in S}{x \dependson A}}
+        で定義される $\sigma$ を，$M$ に於ける \newwordjaen{閉包演算子}{closure operator}と呼ぶ．
+        また $A \subseteq S$ に対して $\app{\sigma}{A}$ を $A$ の\newwordjaen{閉包}{closure}と呼ぶ．
+      }
+      \complpar{}{
+        以降，マトロイド $M = \seqprn{S, \Indset}$ に
+        $M$ の基族 $\Base$，階数函数 $\rho$，閉包演算子 $\sigma$，周族 $\Circuit$ を加えた組をも単にマトロイドと呼び，
+        $M = \seqprn{S, \Indset; \Base, \rho, \sigma, \Circuit}$ と書いてよいことにする．
+      }
+    % ---- ----
+    \subsection{マトロイドの公理}
+      \plainpar{}{
+        前節で定義したマトロイドに関する基礎的概念である基族，階数函数，閉包演算子，周族それぞれに対して，
+        公理のように扱われる定理を掲げる．
+        これらの証明がひとまずの目標であり，以降の章で順次示していくことにする．
+      }
+      \thmpar{基公理}{
+        $S$ を有限集合とする．
+        $\Base \subseteq \Power{S}$ が或る $S$ 上のマトロイドの基族であるための必要十分条件は
+        \begin{align}
+        \tag{B0}\label{axiom:B0}&
+          \Base \neq \varnothing
+        \\
+        \tag{B1}\label{axiom:B1}&
+          \forallin{B_{1}|B_{2}}{\Base}{\forallin{x}{B_{1} \setmns B_{2}}{
+            \existsin{y}{B_{2} \setmns B_{1}}{\paren{B_{1} \cup \setprn{y}} \setmns \setprn{x} \in \Base}
+          }}
+        \end{align}
+        である．
+      }
+      \thmpar{階数公理}{
+        $S$ を有限集合とする．
+        $\funcdoms{\rho}{\Power{S}}{\setN}$ が或る $S$ 上のマトロイドの階数函数であるための必要十分条件は
+        \begin{align}
+        \tag{R1}\label{axiom:R1}&
+          \app{\rho}{\varnothing} = 0
+        \\
+        \tag{R2}\label{axiom:R2}&
+          \forallsub{X}{S}{\forallin{y}{S}{
+            \app{\rho}{X} \leq \app{\rho}{X \cup \setprn{y}} \leq \app{\rho}{X} + 1
+          }}
+        \\
+        \tag{R3}\label{axiom:R3}&
+          \forallsub{X}{S}{\forallin{y|z}{S}{
+            \lflimpl{
+              \app{\rho}{X \cup \setprn{y}} = \app{\rho}{X \cup \setprn{z}} = \app{\rho}{X}
+            }{
+              \app{\rho}{X \cup \setprn{y} \cup \setprn{z}} = \app{\rho}{X}
+            }
+          }}
+        \end{align}
+        である．
+      }
+      \thmpar{階数公理別版}{
+        $S$ を有限集合とする．
+        $\funcdoms{\rho}{\Power{S}}{\setN}$ が或る $S$ 上のマトロイドの階数函数であるための必要十分条件は
+        \begin{align}
+        \tag{R1\textprime}\label{axiom:R1'}&
+          \forallsub{X}{S}{0 \leq \app{\rho}{X} \leq \card{X}}
+        \\
+        \tag{R2\textprime}\label{axiom:R2'}&
+          \forallsub{X|Y}{S}{\lflimpl{X \subseteq Y}{\app{\rho}{X} \leq \app{\rho}{Y}}}
+        \\
+        \tag{R3\textprime}\label{axiom:R3'}&
+          \forallsub{X|Y}{S}{\app{\rho}{X \cup Y} + \app{\rho}{X \cap Y} \leq \app{\rho}{X} + \app{\rho}{Y}}
+        \end{align}
+        である．
+      }
+      \thmpar{閉包公理}{
+        $S$ を有限集合とする．
+        $\funcdoms{\sigma}{\Power{S}}{\Power{S}}$ が或る $S$ 上のマトロイドの閉包演算子であるための必要十分条件は
+        \begin{align}
+        \tag{S1}\label{axiom:S1}&
+          \forallsub{X}{S}{X \subseteq \app{\sigma}{X}}
+        \\
+        \tag{S2}\label{axiom:S2}&
+          \forallsub{X|Y}{S}{\lflimpl{X \subseteq Y}{\app{\sigma}{X} \subseteq \app{\sigma}{Y}}}
+        \\
+        \tag{S3}\label{axiom:S3}&
+          \forallsub{X}{S}{\app{\sigma}{X} = \app{\sigma}{\app{\sigma}{X}}}
+        \\
+        \tag{S4}\label{axiom:S4}&
+          \forallsub{X}{S}{\forallin{x|y}{S}{
+            \lflimpl{
+              \lfland{y \not\in \app{\sigma}{X}}{y \in \app{\sigma}{X \cup \setprn{x}}}
+            }{
+              x \in \app{\sigma}{X \cup \setprn{y}}
+            }
+          }}
+        \end{align}
+        である．
+      }
+      \thmpar{周公理}{
+        $S$ を有限集合とする．
+        $\Circuit$ が或る $S$ 上のマトロイドの周族であるための必要十分条件は
+        \begin{align}
+          \tag{C1}\label{axiom:C1}&
+          \forallin{C_{1}|C_{2}}{\Circuit}{\lflimpl{C_{1} \neq C_{2}}{C_{1} \not\subseteq C_{2}}}
+        \\
+          \tag{C2}\label{axiom:C2}&
+          \forallin{C_{1}|C_{2}}{\Circuit}{\lflimpl{C_{1} \neq C_{2}}{
+            \forallin{z}{C_{1} \cap C_{2}}{\existsin{C_{3}}{\Circuit}{
+              C_{3} \subseteq \paren{C_{1} \cup C_{2}} \setmns \setprn{z}
+            }}
+          }}
+        \end{align}
+        である．
+      }
+      \complpar{}{
+        まだ証明は与えていないが，これらが必要条件だけでなく十分条件でもあることは注目に値する．
+        これらが成り立つことで，マトロイドは
+        基族 $\Base$，階数函数 $\rho$，閉包演算子 $\sigma$，周 $\Circuit$
+        のうちどれかひとつからでも構成できるということがわかる．
+      }
+    % ---- ----
+    \subsection{様々なマトロイド}
+      \defpar{同型}{
+        マトロイド $M_{1} = \seqprn{S_{1}, \Indset_{1}}$，$M_{2} = \seqprn{S_{2}, \Indset_{2}}$ に対し，
+        \begin{align*}
+          \existsisom{\phi}{S_{1}}{S_{2}}{
+            \lfland{
+              \forallsub{X}{S_{1}}{\lflimpleqv{X \in \Indset_{1}}{\funcimg{\phi}{X} \in \Indset_{2}}}
+            }{
+              \forallsub{Y}{S_{2}}{\lflimpleqv{\funcimg{\phi^{-1}}{Y} \in \Indset_{1}}{Y \in \Indset_{2}}}
+            }
+          }
+        \end{align*}
+        が成り立つとき，$M_{1}$ と $M_{2}$ は\newwordjaen{同型である}{isomorphic}といい，
+        このときの全単射 $\phi$ を\newwordjaen{同型写像}{isomorphism}と呼ぶ．
+      }
+      \defpar{自由マトロイド}{
+        有限集合 $S$ に対して
+          $\seqprn{S, \Power{S}; \setprn{S}, \card{\dummysign}, \idem_{S}, \varnothing}$
+        を\newwordjaen{自由マトロイド}{free matroid}と呼ぶ．
+      }
+      \defpar{一様マトロイド}{
+        $n, k \in \setN$ は $k \leq n$ を満たすとし，$S$ を $\card{S} = n$ なる集合とする．
+        \begin{align*}
+          \Indset &\defeq \setprnsep{X \subseteq S}{\card{X} \leq k}
+        \\
+          \Base &= \setprnsep{X \subseteq S}{\card{X} = k}
+        \\
+          \Circuit &= \setprnsep{X \subseteq S}{\card{X} = k + 1}
+        \end{align*}
+        \parbox[c]{0.49\textwidth}{\funcdomswidebox{\rho}{\Power{S}}{\setN}{A}{
+          \begin{cases}
+            \card{A} &\caseif{\card{A} \leq k}
+          \\
+            k        &\caseow
+          \end{cases}
+        }}\quad
+        \parbox[c]{0.49\textwidth}{\funcdomswidebox{\sigma}{\Power{S}}{\Power{S}}{A}{
+          \begin{cases}
+            A &\caseif{\card{A} < k}
+          \\
+            S &\caseow
+          \end{cases}
+        }}
+        からなるマトロイド $U_{k, n} = \seqprn{S, \Indset; \Base, \rho, \sigma, \Circuit}$，
+        およびこれに同型なマトロイドを\newwordjaen{一様マトロイド}{uniform matroid}と呼ぶ．
+      }
+      \thmpar[thm:vectorial-matroid]{ベクトル空間によるマトロイド}{
+        $\seqprn{V, +, \cdot}$ を体 $\seqprn{K, +, \cdot}$ 上のベクトル空間とし，$S \in \Powerfin{V}$ とする．
+        また $S$ の部分集合のうち $\seqprn{V, +, \cdot}$ 上線型独立であるもの全体を $\Indset$ とすると，
+        $M = \seqprn{S, \Indset}$ はマトロイドである．
+      }
+      \proof{}{
+        $\Indset$ が\eqref{axiom:I1}，\eqref{axiom:I2}を満たすことは明らかなので，以降\eqref{axiom:I3}について背理法で示す．
+        線型独立な集合 $X$ と $Y$ が $\card{X} = \card{Y} + 1$ を満たすとすると，$X \setmns Y \neq \varnothing$ である．
+        いま仮に任意の $x \in X \setmns Y$ に対して $Y \cup \setprn{x}$ が線型従属であるとすると，
+        $Y$ は線型独立であるから $X \cup Y$ が生成する部分空間 $W$ の基底集合である．
+        このとき，$X \subseteq W$ も線形独立であり，$X \subseteq E$ なる基底集合 $E$ が存在する．
+        この $E$ は $\card{E} \geq \card{X} > \card{Y}$ を満たすが，
+        同一の部分空間の基底集合がすべて大きさが相等しいことによる $\card{Y} = \card{E}$ と矛盾．
+        したがって或る $x \in X \setmns Y$ が存在して $Y \cup \setprn{x}$ は線型独立である．\qed
+      }
+      \defpar{ベクトル的マトロイド}{
+        ベクトル空間 $\seqprn{V, +, \cdot}$ から
+        定理\ref{thm:vectorial-matroid}のようにして得られるマトロイド $M = \seqprn{S, \Indset}$，
+        およびこれに同型なマトロイドを\newwordjaen{ベクトル的マトロイド}{vectorial matroid}と呼ぶ．
+      }
+      \complpar{}{
+        ベクトル空間 $\seqprn{V, +, \cdot}$ によるベクトル的マトロイド $M = \seqprn{S, \Indset}$ に於いて，
+        基族 $\Base$ は $S$ が生成する部分空間の基底集合で $S$ に包まれるもの全体，
+        $X \subseteq S$ の階数は $X$ の張る空間の次元，すなわち $\app{\rho}{X} = \dim X$ である．
+        また $M$ の平坦集合はベクトル空間 $\seqprn{V, +, \cdot}$ の部分空間であり，
+        $X$ の閉包は $X$ の元の線型結合で表せるもの全体，すなわち $X$ が生成する部分空間である．
+        「平坦集合」という名前は，
+        $\dim V = 3$ のベクトル空間 $\seqprn{V, +, \cdot}$ によるベクトル的マトロイド $\seqprn{S, \Indset}$ で
+        $\app{\rho}{F} = \dim F = 2$ なる平坦集合 $F$ は，その元がひとつの平面上に乗っており，
+        また $S \setmns F$ の元を追加するとその平面性が損なわれる，という具体的イメージを反映したものである．
+        平坦集合を部分空間と呼ぶことがあるのも，やはりこのベクトル空間からのアナロジーである．
+      }
+      \thmpar[thm:cycle-matroid]{無向グラフによるマトロイド}{
+        無向グラフ $G = \seqprn{V, E}$ に対し，
+        $S \defeq E$，また $G$ の閉路を持たない $E$ の部分集合全体を $\Indset$ とすると，
+        $\seqprn{S, \Indset}$ はマトロイドをなす．
+      }
+      \proof{}{
+        \eqref{axiom:I1}，\eqref{axiom:I2}は明らかであるから，\eqref{axiom:I3}を示す．
+        閉路を持たない辺集合 $X$ と $Y$ が $\card{X} = \card{Y} + 1$ を満たすとする．
+        このとき，$X \setmns Y \neq \varnothing$ である．
+        いま仮に任意の $e \in X \setmns Y$ に対して $Y \cup \setprn{e}$ が閉路を持つとすると，
+        $Y$ は $X \cup Y$ が生成する $G$ の部分グラフの全域森である．
+        一方で $X$ も閉路を持たないから $X \cup Y$ が生成する $G$ の部分グラフの部分森であるが，
+        この部分森は $\card{X} > \card{Y}$ より全域森よりも大きく，矛盾．
+        ゆえに，或る $e \in X \setmns Y$ が存在して $Y \cup \setprn{e}$ は閉路を持たない．\qed
+      }
+      \defpar{閉路マトロイド}{
+        無向グラフ $G = \seqprn{V, E}$ に対し，定理\ref{thm:cycle-matroid}により得られる $M = \seqprn{E, \Indset}$ を
+        $G$ の\newwordjaen{閉路マトロイド}{cycle matroid}と呼ぶ．
+      }
+      \complpar{}{
+        結局，閉路マトロイドでの独立集合とは $G$ の部分森をなす辺集合である．
+        したがって基とは $G$ の全域森をなす辺集合である%
+        \footnote{%
+          ただし，基 $B \subseteq E$ に対して或る $G$ の全域森が存在してその辺集合が $B$ と一致することは言えるが，
+          $B$ が全域森を生成するとは限らない．$G$ が次数 $0$ の頂点を持つかもしれないからである．
+        }．
+        さらに周とは $G$ の閉路をなす辺集合であり，「周」（``circuit''）という名称も，
+        この閉路からのアナロジーである．
+      }
+      \example{}{
+        $K_{3}$ の閉路マトロイドは $E \defeq \setprn{e_{1}, e_{2}, e_{3}}$，
+        $
+          \Indset \defeq \setprn{\setprn{}, \setprn{e_{1}}, \setprn{e_{2}}, \setprn{e_{3}},
+            \setprn{e_{1}, e_{2}}, \setprn{e_{2}, e_{3}}, \setprn{e_{3}, e_{1}}}
+        $
+        なる $\seqprn{E, \Indset}$ で，これは一様マトロイド $U_{2, 3}$ に等しい．
+      }
+      \defpar{代数独立性}{
+        $\seqprn{F, +, \cdot}$ を体とする．$\seqprn{F, +, \cdot}$ の拡大体 $\seqprn{K, +, \cdot}$
+        および $\setprn{x_{1}, \ldots, x_{k}} \subseteq K$ に対し，
+        $F$ の元を係数とする或る多項式 $f$ が存在して
+        $
+          \app{f}{x_{1}, \ldots, x_{k}} = 0
+        $
+        を満たすとき，$\setprn{x_{1}, \ldots, x_{k}}$ は
+        $\seqprn{F, +, \cdot}$ 上\newwordjaen{代数独立である}{algebraically independent}という．
+      }
+      \defpar{アフィン従属性}{
+        $\setprn{x_{1}, \ldots, x_{r}} \in \Powerfin{\setR^{d}}$ に対し，$x \in \setR^{d}$ が
+        \begin{align*}
+          &\existsin{\seqprn{\lambda_{i}}_{i = 1}^{r}}{\setR^{r}}{
+            x = \sum_{i = 1}^{r} \lambda_{i} x_{i}
+          }
+        \end{align*}
+        を満たすとき，$x$ は $\setprn{x_{1}, \ldots, x_{r}}$ に\newwordjaen{アフィン従属する}{affinely depend}という．
+        また，$X \subseteq \setR^{d}$ の任意の元 $x$ が $X \setmns \setprn{x}$ にアフィン従属しないとき，
+        $X$ は\newwordjaen{アフィン独立である}{affinely independent}という．
+      }
+      \thmpar{}{
+        体 $\seqprn{F, +, \cdot}$ と $\seqprn{F, +, \cdot}$ の拡大体 $\seqprn{K, +, \cdot}$ に対して
+        $S \in \Powerfin{K}$ とし，$\seqprn{F, +, \cdot}$ 上代数独立な $S$ の部分集合全体を $\Indset$ とおくと，
+        $\seqprn{S, \Indset}$ はマトロイドをなす．
+      }
+      \defpar{可換群に於ける独立性，従属性}{
+        $\seqprn{J, +}$ を，単位元 $0_{J}$ を除くすべての元が位数 $0$ である可換群とする．
+        $\setprn{x_{1}, \ldots, x_{n}} \subseteq J$ と $g \in J$ に対し，
+        \begin{align*}
+          \existsin{m}{\setZ \setmns \setprn{0}}{\existsin{\seqprn{k_{i}}_{i = 1}^{n}}{\setZ^{n}}{
+            mg = k_{1} x_{1} + \cdots + k_{n} x_{n}
+          }}
+        \end{align*}
+        が成り立つとき，$g$ は $\setprn{x_{1}, \ldots, x_{n}}$ に\newwordjaen{従属する}{depend}という．
+        また，$Y \subseteq J$ の任意の元 $y$ が $Y \setmns \setprn{y}$ に従属しないとき，
+        $Y$ は\newwordjaen{独立である}{independent}という．
+        このとき，有限部分集合 $S \subseteq J$ に対し，$S$ の部分集合で独立なもの全体を $\Indset$ とおくと，
+        $M = \seqprn{S, \Indset}$ はマトロイドをなす．
+      }
+    % --- ----
+    \subsection{ループと並行}
+      \plainpar{}{
+        最初に独立集合族，基族，階数函数，閉包演算子，周についての扱いに慣れる意図も込めて，
+        ループと並行という概念について触れておく．
+      }
+      \defpar{ループ，並行}{
+        マトロイド $M = \seqprn{S, \Indset}$ に対し，$x \in S$ が $\setprn{x} \not\in \Indset$ を満たす，
+        すなわち $\setprn{x}$ が従属であるとき，$x$ を $M$ の\newwordjaen{ループ}{loop}と呼び，$\isloop{M} x$ と書くことにする．
+        また $x, y \in S$ が
+          $\setprn{x} \in \Indset$ かつ $\setprn{y} \in \Indset$ かつ $\setprn{x, y} \not\in \Indset$
+        を満たすとき，$x$ と $y$ は $M$ に於いて\newwordjaen{並行している}{parallel}といい，$x \mparallel{M} y$ と書くことにする．
+      }
+      \plainpar{}{
+        閉路マトロイドでは，ループはもとのグラフでのループ，並行性はもとのグラフでの並行性に相当し，
+        マトロイドに於けるループと並行性の名前はこれに基づいている．
+        $\seqprn{K, +, \cdot}$ 上ベクトル空間 $\seqprn{V, +, \cdot}$ からつくられる
+        ベクトル的マトロイド $\seqprn{S, \Indset}$ は，$V$ の零元を $\veczero$ として，
+        $0 \in S$ のとき $S$ のループは $\veczero$ のみであり，$\veczero \not\in S$ のとき $S$ はループをもたない．
+        $\vecx, \vecy \in S$ が並行するとは，$\vecy = a \vecx$ なる $a \in K \setmns \setprn{0}$ が存在することに相当する．
+      }
+      \lempar[lem:augment-dependence]{従属集合を包む集合の従属性}{
+        マトロイド $M = \seqprn{S, \Indset}$ に対し，
+          \begin{align*}
+            &\forallsub{X|Y}{S}{
+              \lflimpl{\lfland{X \not\in \Indset}{X \subseteq Y}}{Y \not\in \Indset}
+            }
+          \end{align*}
+        が成り立つ．すなわち，従属集合を包む任意の集合は従属集合である．
+      }
+      \proof{}{
+        従属集合 $X \in \Power{S} \setmns \Indset$ に対し，$Y \subseteq S$ が $X \subseteq Y$ を満たすとする．
+        いま仮に $Y \in \Indset$ とすると，$X \subseteq Y$ と\eqref{axiom:I2}より $X \in \Indset$ が成り立ち矛盾．
+        ゆえに $Y \in \Power{S} \setmns \Indset$，すなわち $Y$ は従属集合．\qed
+      }
+      \thmpar{ループに関する簡単な定理}{
+        マトロイド $M = \seqprn{S, \Indset; \Base, \rho, \sigma, \Circuit}$ に対し，以下がそれぞれ成り立つ．
+        \begin{thmenum}
+          \thmenumitem\label{thm:loop-fundamental|1}
+            ループであることと $1$ 元集合の階数が $0$ であることは同値：\quad
+              $\forallin{x}{S}{\lflimpleqv{\isloop{M} x}{\app{\rho}{\setprn{x}} = 0}}$
+          \thmenumitem\label{thm:loop-fundamental|2}
+            ループであることと空集合の閉包に含まれることは同値：\quad
+              $\forallin{x}{S}{\lflimpleqv{\isloop{M} x}{x \in \app{\sigma}{\varnothing}}}$
+          \thmenumitem\label{thm:loop-fundamental|3}
+            ループを含む集合は従属：\quad
+              $\forallsub{A}{S}{\lflimpl{\existsin{x}{A}{\isloop{M} x}}{A \not\in \Indset}}$
+          \thmenumitem\label{thm:loop-fundamental|4}
+            任意の集合の閉包は任意のループを含む：\quad
+              $\forallin{x}{S}{\lflimpl{\isloop{M} x}{\forallsub{A}{S}{x \in \app{\sigma}{A}}}}$
+          \thmenumitem\label{thm:loop-fundamental|5}
+            ループであることと $1$ 元集合が周であることは同値：\quad
+              $\forallin{x}{S}{\lflimpleqv{\isloop{M} x}{\setprn{x} \in \Circuit}}$
+          \thmenumitem\label{thm:loop-fundamental|6}
+            ループであることとどの基にも含まれないことは同値：\quad
+              $\forallin{x}{S}{\lflimpleqv{\isloop{M} x}{\forallin{B}{\Base}{x \not\in B}}}$
+        \end{thmenum}
+      }
+      \proof{}{
+        \subproof{\ref{thm:loop-fundamental|1}}{
+          $x \in S$ に対して $\isloop{M} x$ すなわち $\setprn{x} \not\in \Indset$ と仮定すると，
+          \eqref{axiom:I1}より $\setprn{x}$ に包まれる独立集合は $\varnothing$ のみであるから，
+            $\app{\rho}{\setprn{x}}
+              = \max \setprnsep{\card{X}}{\lfland{X \subseteq \setprn{x}}{X \in \Indset}} = \card{\varnothing} = 0$
+          である．逆に $x \in S$ が $\app{\rho}{\setprn{x}} = 0$ を満たすとする．
+          仮に $\setprn{x} \in \Indset$ ならば $\app{\rho}{x} \geq \card{\setprn{x}} = 1$ であるから矛盾し，
+          したがって $\setprn{x} \not\in \Indset$，すなわち $\isloop{M} x$ である．\qed
+        }
+        \subproof{\ref{thm:loop-fundamental|2}}{
+          $\isloop{M} x$ と仮定すると，\ref{thm:loop-fundamental|1}より $\app{\rho}{\setprn{x}} = 0$ であるから
+            $\app{\rho}{\varnothing \cup \setprn{x}} = \app{\rho}{\setprn{x}} = 0 = \app{\rho}{\varnothing}$．
+          ゆえに $x \dependson \varnothing$，すなわち $x \in \app{\sigma}{\varnothing}$．
+          逆に $x \in \app{\sigma}{\varnothing}$ とすると $x \dependson \varnothing$ であるから
+            $\app{\rho}{\setprn{x}} = \app{\rho}{\varnothing \cup \setprn{x}} = \app{\rho}{\varnothing} = 0$
+          が成り立ち，やはり\ref{thm:loop-fundamental|1}より $\isloop{M} x$．\qed
+        }
+        \subproof{\ref{thm:loop-fundamental|3}}{
+          $A \subseteq S$ とする．$\isloop{M} x$ なる $x \in A$ が存在するとき，
+          この $x$ は $\setprn{x} \not\in \Indset$ を満たすから，
+          補題\ref{lem:augment-dependence}より$A \not\in \Indset$．\qed
+        }
+        \subproof{\ref{thm:loop-fundamental|4}}{
+          $\isloop{M} x$ なる $x \in S$ および $A \subseteq S$ に対して，
+          $\rho$ の定義より
+          $\card{X} = \app{\rho}{A \cup \setprn{x}}$ かつ $X \subseteq A \cup \setprn{x}$
+          なる $X \in \Indset$ が存在する．仮にこの $X$ が $x \in X$ を満たすとすると
+          $\setprn{x} \subseteq X$ と\eqref{axiom:I2}より $\setprn{x} \in \Indset$ が成り立ち矛盾するから，
+          $x \not\in X$ である．したがって $X \subseteq A$ であり，$\card{X} \leq \app{\rho}{A}$．
+          ここで仮に $\card{X} < \app{\rho}{A}$ が成り立つとすると，或る $Y \in \Indset$ が存在して
+          $\card{X} < \card{Y}$ かつ $Y \subseteq A$ であるが，この $Y$ は $Y \subseteq A \cup \setprn{x}$ を満たすから
+          $\card{Y} \leq \app{\rho}{A \cup \setprn{x}} = \card{X}$ が成り立ち矛盾．
+          ゆえに $\app{\rho}{A \cup \setprn{x}} = \card{X} = \app{\rho}{A}$ すなわち $x \dependson A$ であり，
+          $x \in \app{\sigma}{A}$．\qed
+        }
+        \subproof{\ref{thm:loop-fundamental|5}}{
+          \eqref{axiom:I1}：$\varnothing \in \Indset$ と
+          周族の定義 $\Circuit \defeq \minl \paren{\Power{S} \setmns \Indset}$ より明らか．\qed
+        }
+        \subproof{\ref{thm:loop-fundamental|6}}{
+          いま仮に或る $x \in S$ と $B \in \Base$ が存在して $\isloop{M} x$ かつ $x \in B$ を満たすとすると，
+          $\setprn{x} \subseteq B$ と\eqref{axiom:I2}より $\setprn{x} \in \Indset$ となり矛盾．
+          よって $\isloop{M} x$ なる $x \in S$ に対しては任意の $B \in \Base$ が $x \not\in B$ を満たす．
+          一方，$x \in S$ に対して $\lflnot{\isloop{M} x}$ とすると $\setprn{x} \in \Indset$ であるから，
+          基の極大性より $\setprn{x} \subseteq B$ なる $B \in \Base$ が存在する．これの対偶をとって，
+          $x \in S$ に対して任意の $B \in \Base$ が $x \not\in B$ を満たすならば $\isloop{M} x$ である．\qed
+        }
+      }
+      \thmpar{並行に関する簡単な定理}{
+        マトロイド $M = \seqprn{S, \Indset, \Base, \rho, \sigma, \Circuit}$ に対し，以下がそれぞれ成り立つ．
+        \begin{thmenum}
+          \thmenumitem\label{thm:parallel-fundamental|1}
+            相異なる $2$ 元が並行であることとその $2$ 元からなる集合が周であることは同値：
+            \begin{align*}
+              &\forallin{x|y}{S}{\lflimpleqv{x \mparallel{M} y}{\setprn{x, y} \in \Circuit}}
+            \end{align*}
+          \thmenumitem\label{thm:parallel-fundamental|2}
+            並行性は“非反射的な推移律”を満たす：
+            \begin{align*}
+              &\forallin{x|y|z}{S}{\lflimpl{
+                \lfland{\lfland{x \mparallel{M} y}{y \mparallel{M} z}}{x \neq z}
+              }{x \mparallel{M} z}}
+            \end{align*}
+          \thmenumitem\label{thm:parallel-fundamental|3}
+            \begin{align*}
+              \forallin{x|y}{S}{\lflimpl{x \neq y}{
+                \lflimpleqv{x \mparallel{M} y}{
+                  \lfland{
+                    \lfland{x \in \app{\sigma}{\setprn{y}}}{y \in \app{\sigma}{\setprn{x}}}
+                  }{
+                    \lfland{\lflnot{\isloop{M} x}}{\lflnot{\isloop{M} y}}
+                  }
+                }
+              }}
+            \end{align*}
+        \end{thmenum}
+      }
+      \proof{}{
+        \subproof{\ref{thm:parallel-fundamental|1}}{
+          周の極小性より明らか．\qed
+        }
+        \subproof{\ref{thm:parallel-fundamental|2}}{
+          $x \mparallel{M} y$ かつ $y \mparallel{M} z$ かつ $x \neq z$ とすると，
+          $\setprn{x} \in \Indset$，$\setprn{y} \in \Indset$，$\setprn{z} \in \Indset$．
+          ここで仮に $\setprn{x, z} \in \Indset$ であるとすると，$x \neq z$ より
+          $\card{\setprn{x, z}} = \card{\setprn{y}} + 1$ が成り立つから，
+          \eqref{axiom:I3}より $\setprn{x, y} \in \Indset$ または $\setprn{x, z} \in \Indset$ が成り立つが，
+          これは仮定に矛盾．ゆえに $\setprn{x, z} \not\in \Indset$ であり，結局 $x \mparallel{M} z$ が成り立つ．\qed
+        }
+        \subproof{\ref{thm:parallel-fundamental|3}}{
+          $\setprn{x} \in \Indset$ かつ $\setprn{y} \in \Indset$ かつ $x \neq y$ なる $x, y \in S$ に対して，
+          $\setprn{x, y} \not\in \Indset$ と $x \in \app{\sigma}{\setprn{y}}$ かつ $y \in \app{\sigma}{\setprn{x}}$ が
+          同値であることを示せばよい．
+          まず $\setprn{x, y} \not\in \Indset$ とすると，$\setprn{x} \in \Indset$ かつ $\setprn{y} \in \Indset$ より
+            $\app{\rho}{\setprn{x, y}} = \card{\setprn{x}} = \card{\setprn{y}}$
+          であり，また
+            $\app{\rho}{\setprn{x}} = \card{\setprn{x}}$，$\app{\rho}{\setprn{y}} = \card{\setprn{y}}$
+          であるから，
+            $\app{\rho}{\setprn{x} \cup \setprn{y}} = \app{\rho}{\setprn{x, y}} = \app{\rho}{\setprn{x}}$
+          すなわち $x \dependson \setprn{y}$ が成り立ち，$x \in \app{\sigma}{\setprn{y}}$．
+          $y \in \app{\sigma}{\setprn{x}}$ も同様．
+          逆に $x \in \app{\sigma}{\setprn{y}}$ かつ $y \in \app{\sigma}{\setprn{x}}$ とすると
+          $x \dependson \setprn{y}$ であるから
+            $\app{\rho}{\setprn{x, y}} = \app{\rho}{\setprn{y}} = \card{\setprn{y}} = 1$．
+          このとき仮に $\setprn{x, y} \in \Indset$ とすると
+            $1 = \app{\rho}{\setprn{x, y}} \geq \card{\setprn{x, y}} = 2$
+          より矛盾するから，$\setprn{x, y} \not\in \Indset$ が成り立つ．\qed
+        }
+      }
+    % ---- ----
+    \subsection{独立集合と基に関する性質}
+      \plainpar{}{
+        これまでは“代数系らしい姿”のマトロイドを見てきたが，
+        ここでイメージを掴むためにマトロイドを具体的に描いてみよう．
+        マトロイド $M = \seqprn{S, \Indset}$ に対し，
+        半順序系 $\seqprn{\Power{S}, \subseteq}$ のHasse図を描き，
+        独立か従属かによって $S$ の各部分集合に相当する各点を塗り分けることを考える．
+        簡単な例として，ここでは $\card{S} = 3$ なる $S$ に対してマトロイドを描くことにしよう．
+        $S$ の各元を $a$，$b$，$c$ と表すと，$\seqprn{\Power{S}, \subseteq}$ のHasse図は
+        図\ref{fig:hasse1}のようになる．大きさの相等しい $S$ の部分集合は横一列に並んでいることに注目してほしい．
+        これを図\ref{fig:hasse2}のように個々の要素を無視して構造のみ描くことにする．
+      }
+      % ----
+      \begin{figure}[htbp]
+      \centering
+        \begin{tabular}{cc}
+          \input{img/hasse1.tex}       & \input{img/hasse2.tex}\\
+          \subfigure\label{fig:hasse1} & \subfigure\label{fig:hasse2}
+        \end{tabular}
+        \caption{冪集合の包含関係を半順序とするHasse図}
+      \end{figure}
+      % ----
+      \plainpar{}{
+        独立集合に対応する点を黒色，従属集合に対応する点を灰色で塗ることにしよう．
+        ここで独立集合の公理を思い返すと
+        \begin{align*}
+          \tag{I1}&
+          \varnothing \in \Indset
+        \\
+          \tag{I2}&
+          \forallin{X}{\Indset}{\forallsub{Y}{X}{Y \in \Indset}}
+        \\
+          \tag{I3}&
+          \forallin{U|V}{\Indset}{\lflimpl{\card{U} = \card{V} + 1}{
+            \existsin{x}{U \setmns V}{V \cup \setprn{x} \in \Indset}
+          }}
+        \end{align*}
+        であった．最下点を「$0$ 段目」とし，
+        また下に降りて辿り着ける点を「下位」，上に登って辿り着ける点を「上位」と表現することにして，
+        各公理を“Hasse図でのことば”に直すと，
+        \begin{itemize}
+          \item\eqref{axiom:I1}：\quad 最下点は黒色
+          \item\eqref{axiom:I2}：\quad 黒色の点の子孫はすべて黒色
+          \item\eqref{axiom:I3}：\quad 黒色の点 $V$ と $V$ より $1$ 段高い位置の黒色の点 $U$ に対して，
+            $V$ から $1$ 段上位の或る黒色の点 $W$ があり，$U$ と $W$ から共通に下位だが $V$ の下位ではない点が $1$ 段目にある
+        \end{itemize}
+        となる．これに基づけば，大きさ $3$ の集合上のマトロイドは，同型を除いて図\ref{fig:hasse-matroid}の $8$ 種類である．
+      }
+      % ----
+      \begin{figure}[tb]
+      \centering
+        \begin{tabular}{cccc}
+        &&&\\
+          \input{img/hasse-matroid1.tex}       & \input{img/hasse-matroid2.tex}
+              & \input{img/hasse-matroid3.tex}       & \input{img/hasse-matroid4.tex}
+        \\
+          \subfigure\label{fig:hasse-matroid1} & \subfigure\label{fig:hasse-matroid2}
+              & \subfigure\label{fig:hasse-matroid3} & \subfigure\label{fig:hasse-matroid4}
+        \\&&&\\
+          \input{img/hasse-matroid5.tex}       & \input{img/hasse-matroid6.tex}
+              & \input{img/hasse-matroid7.tex}       & \input{img/hasse-matroid8.tex}
+        \\
+          \subfigure\label{fig:hasse-matroid5} & \subfigure\label{fig:hasse-matroid6}
+              & \subfigure\label{fig:hasse-matroid7} & \subfigure\label{fig:hasse-matroid8}
+        \\&&&
+        \end{tabular}
+        \caption{Hasse図で表現された大きさ $3$ の集合上のマトロイド}\label{fig:hasse-matroid}
+      \end{figure}
+      % ----
+      \plainpar{}{
+        図\ref{fig:hasse-matroid1}は一様マトロイド $U_{3, 0}$，図\ref{fig:hasse-matroid4}は $U_{3, 1}$，
+        図\ref{fig:hasse-matroid7}は $U_{3, 2}$，図\ref{fig:hasse-matroid8}は $U_{3, 3}$ であり自由マトロイドである．
+      }
+      \plainpar{}{
+        ところで独立集合族の公理のうち\eqref{axiom:I3}だけは他に比べて複雑で直感的に捉えにくいが，
+        $\card{U} = \card{V} + 1$ なる $U$，$V$，すなわち大きさが $1$ 異なる独立集合の組に限らず，
+        $\card{X} < \card{Y}$ なる $X$，$Y$，すなわち単に大きさが異なる独立集合の組にまで
+        “\eqref{axiom:I3}のような公理”を一般化することができる．
+        これが次に述べる\newwordjaen{増強定理}{augmentation theorem}である．
+      }
+      \thmpar[thm:augmentation]{増強定理}{
+        マトロイド $M = \seqprn{S, \Indset}$ に対し，
+        \begin{align*}
+          &\forallin{X|Y}{\Indset}{\lflimpl{\card{X} < \card{Y}}{
+            \existssub{Z}{Y \setmns X}{\lfland{X \cup Z \in \Indset}{\card{X \cup Z} = \card{Y}}}
+          }}
+        \end{align*}
+        が成り立つ．
+      }
+      \proof{}{
+        $\card{X} < \card{Y}$ なる $X, Y \in \Indset$ を考える．
+        $X \cup Z \in \Indset$ なる $Z \subseteq Y \setmns X$ のうち，
+        $\card{X \cup Z}$ を最大化する $Z$ を $Z_{0}$ とおく．
+        いま $\card{X \cup Z_{0}} < \card{Y}$ であると仮定すると，
+        (I2)より $Y_{0} \in \Indset$ かつ $\card{Y_{0}} = \card{X \cup Z_{0}} + 1$ なる
+        $Y_{0} \subseteq Y$ が存在する．この $Y_{0}$ をとると
+        (I3)より $\paren{X \cup Z_{0}} \cup \setprn{y} \in \Indset$ なる
+        $y \in Y_{0} \setmns \paren{X \cup Z_{0}}$ が存在するが，この $y$ は
+        $\card{X \cup \paren{Z_{0} \cup \setprn{y}}} > \card{X \cup Z_{0}}$ を満たすから，
+        $Z_{0}$ のとり方に反する．
+        よって $\card{X \cup Z_{0}} \geq \card{Y}$ である．
+        $X \cup Z_{0} \subseteq Y$ より $\card{X \cup Z_{0}} \leq \card{Y}$ であるから，
+        結局 $\card{X \cup Z_{0}} = \card{Y}$ が成り立つ．\qed
+      }
+      \complpar{}{
+        増強定理から\eqref{axiom:I3}が得られるのは明らかであり，
+        結局\eqref{axiom:I3}と増強定理は同値ということになる．
+      }
+      \plainpar{}{
+        先ほど大きさ $3$ の台集合を持つマトロイドを考えて図\ref{fig:hasse-matroid}を描いたとき，
+        Hasse図の上で「頂上の黒い点がどれも同じ高さになる」ことが\eqref{axiom:I3}から要請されるのを感じただろうか．
+        「頂上の黒い点」とは極大な独立集合すなわち基に相当する点であるから，
+        「頂上の黒い点がどれも同じ高さになる」ということは，“普通のマトロイドでのことば”に直せば
+        基の大きさはどれも相等しいということになる．
+        実際，それは次に示すように増強定理の系として証明できる．
+      }
+      \corpar[cor:same-size-bases]{}{
+        マトロイド $M$ の基はどれも相等しい大きさを持ち，その大きさは $M$ の階数である．
+      }
+      \proof{}{
+        $M = \seqprn{S, \Indset; \Base, \rho, \sigma, \Circuit}$ とおく．
+        いま仮に或る $B_{1}, B_{2} \in \Base$ に対して $\card{B_{1}} \neq \card{B_{2}}$ とする．
+        $\card{B_{1}} < \card{B_{2}}$ として一般性を失わないのでこう定める．
+        このとき，定理\ref{thm:augmentation}：増強定理より
+        $\card{B_{1} \cup Z} = \card{B_{2}}$ かつ $B_{1} \cup Z \in \Indset$ なる
+        $Z \subseteq B_{2} \setmns B_{1}$ が存在する．
+        この $Z$ に対して基 $B_{1} \cup Z$ は $B_{1} \cup Z \supsetneq B_{1}$ を満たし，基 $B_{1}$ の極大性に反する．
+        よって $\forallin{B_{1}|B_{2}}{\Base}{\card{B_{1}} = \card{B_{2}}}$ である．
+        また，階数函数 $\rho$ の定義および基族の定義 $\Base \defeq \maxl \Indset$ より
+        \begin{align*}
+          \app{\rho}{M}
+            &= \app{\rho}{S}
+          \\&= \max \setprnsep{\card{X}}{\lfland{X \subseteq S}{X \in \Indset}}
+          \\&= \max \setprnsep{\card{X}}{X \in \Base}
+        \end{align*}
+        であるから，結局 $\forallin{B}{\Base}{\app{\rho}{M} = \card{B}}$ である．\qed
+      }
+      \plainpar{}{
+        ただし，注意としては「頂上の高さが揃っている」だけでは\eqref{axiom:I3}が成り立つとは限らない．
+        例えば $\card{S} = 4$ に対する集合族のHasse図として図\ref{fig:hasse-sizeof-four}がある．
+        これは「頂上の高さが揃っている」が，図中のように $U$ と $V$ をとると
+        \eqref{axiom:I3}を満たすような黒色の点 $W = V \cup \setprn{x}$ が存在しないので，
+        マトロイドではない．
+      }
+      \begin{figure}[htb]
+      \centering
+        \input{img/hasse-sizeof-four.tex}
+        \caption{「頂上の高さが揃っている」がマトロイドではない集合族}
+        \label{fig:hasse-sizeof-four}
+      \end{figure}
+      \plainpar{}{
+        さて，あらかじめ掲げておいた基公理の[$\backlimpl$]を示す準備をしておこう．
+        したがって以下の各補題で扱う $\Base$ はマトロイドの基族ではなく，
+        単なる集合族であることに注意されたい．
+      \decosep
+        まずは\eqref{axiom:B1}の“入れ替え”を“$1$ ステップから多ステップ”に拡張してみる．
+      }
+      \lempar[lem:B1-extended]{\eqref{axiom:B1}の拡張}{
+        有限集合 $S$ と集合族 $\Base \subseteq \Power{S}$ が\eqref{axiom:B1}を満たすならば，
+        \begin{align*}
+          &\forallin{B_{1}|B_{2}}{\Base}{\forallsub{X}{B_{1} \setmns B_{2}}{\existssub{Y}{B_{2} \setmns B_{1}}{
+            \lfland{\card{Y} = \card{X}}{\paren{B_{1} \setmns X} \cup Y \in \Base}
+          }}}
+        \end{align*}
+        が成り立つ．
+      }
+      \proof{}{
+        $B_{1}, B_{2} \in \Base$ を任意にとり，$X \subseteq B_{1} \setmns B_{2}$ とする．
+        $X$ の大きさ $\card{X}$ に関する帰納法により示す．
+        \begin{itemize}
+        \item $\card{X} = 0$ のとき，
+          $X = \varnothing$ であり $Y = \varnothing$ が満たすので明らか．
+        \item $\card{X} \geq 1$ のとき，
+          $x \in X$ がとれる．$\card{X \setmns \setprn{x}} < \card{X}$ であるから，
+          帰納法の仮定より或る $Y' \subseteq B_{2} \setmns B_{1}$ が存在して
+          $\card{Y'} = \card{X \setmns \setprn{x}}$ かつ
+          $\paren{B_{1} \setmns \paren{X \setmns \setprn{x}}} \cup Y' \in \Base$ が成り立つ．
+          この $Y'$ を用いて $B_{3} \defeq \paren{B_{1} \setmns \paren{X \setmns \setprn{x}}} \cup Y'$ とすると，
+          $x \in B_{3} \setmns B_{2}$ であるから，\eqref{axiom:B1}より或る $y \in B_{2} \setmns B_{3}$ が存在して
+          $\paren{B_{3} \setmns \setprn{x}} \cup \setprn{y} \in \Base$ を満たす．
+          ここで $Y \defeq Y' \cup \setprn{y}$ とすると，
+          $Y' \subseteq B_{2} \setmns B_{1}$ と $y \in B_{2} \setmns B_{3} \subseteq B_{2} \setmns B_{1}$ より
+          $Y \subseteq B_{2} \setmns B_{1}$ である．また
+          \begin{align*}
+            \paren{B_{3} \setmns \setprn{x}} \cup \setprn{y}
+              = \paren{\paren{B_{1} \setmns X} \cup Y'} \cup \setprn{y}
+              = \paren{B_{1} \setmns X} \cup Y
+          \end{align*}
+          より $\paren{B_{1} \setmns X} \cup Y \in \Base$ が成り立ち，さらに
+          \begin{align*}
+            \card{Y}
+              &= \card{Y' \cup \setprn{y}}
+            \\&= \card{Y'} + 1
+            \\&= \card{X \setmns \setprn{x}} + 1
+            \\&= \card{X} - 1 + 1 = \card{X}
+          \end{align*}
+          より $\card{Y} = \card{X}$ である．ゆえに，或る $Y \subseteq B_{2} \setmns B_{1}$ が存在して
+          $\card{Y} = \card{X}$ かつ $\paren{B_{1} \setmns X} \cup Y \in \Base$ を満たす．
+        \end{itemize}
+        以上より示された．\qed
+        % ----
+        \begin{center}
+          \parbox[c]{0.4\textwidth}{\centering\input{img/ven1.tex}}%
+          \hspace{0.1\textwidth}%
+          \parbox[c]{0.3\textwidth}{灰色部分が $B_{3}$ である．}\par
+          \vspace{1em}%
+        \end{center}
+        % ----
+      }
+      \plainpar{}{
+        上で示した\eqref{axiom:B1}の拡張は，さらにもう少し便利に拡張できる．
+      }
+      \lempar[lem:B1-extended-2]{\eqref{axiom:B1}の拡張2}{
+        有限集合 $S$ と集合族 $\Base \subseteq \Power{S}$ が\eqref{axiom:B1}を満たすならば，
+        \begin{multline*}
+          \forallin{B_{1}|B_{2}}{\Base}{\forallsub{X}{B_{1}}{\existssub{Y}{B_{2}}{
+            \lfland{
+              \lfland{\card{Y} = \card{X}}{\paren{B_{1} \setmns X} \cup Y \in \Base}
+              \midbreak
+            }{
+              X \cap B_{1} \cap B_{2} = Y \cap B_{1} \cap B_{2}
+            }
+          }}}
+        \end{multline*}
+        が成り立つ．
+      }
+      \proof{}{
+        $B_{1}, B_{2} \in \Base$ を任意にとり，$X \subseteq B_{1}$ とする．
+        $Z \defeq X \cap \paren{B_{1} \cap B_{2}}$，$X' \defeq \cap \paren{B_{1} \setmns B_{2}}$ とおくと，
+        $Z \cup X' = X$，$Z \cap X' = \varnothing$ である．
+        このとき，$X' \subseteq B_{1} \setmns B_{2}$ であるから，補題\ref{lem:B1-extended}より
+        或る $Y' \subseteq B_{2} \setmns B_{1}$ が存在して
+        $\card{Y'} = \card{X'}$ かつ $\paren{B_{1} \setmns X'} \cup Y' \in \Base$ を満たす．
+        この $Y'$ を用いて $Y \defeq Y' \cup Z$ とすると，
+        $Y' \subseteq B_{2} \setmns B_{1}$，$Z \subseteq B_{1} \cap B_{2}$ より $Y \subseteq B_{2}$．
+        また，$X' \cap Z = \varnothing$，$Y' \cap Z = \varnothing$，$X' \cap Y' = \varnothing$ より
+        \begin{align*}
+          \paren{B_{1} \setmns X} \cup Y
+            &= \paren{B_{1} \setmns \paren{X' \cup Z}} \cup \paren{Y' \cup Z}
+          \\&= \paren{B_{1} \setmns X'} \cup Y'
+        \end{align*}
+        より，$\paren{B_{1} \setmns X} \cup Y \in \Base$．さらに
+        \begin{align*}
+          \card{Y}
+            &= \card{Y'} + \card{Z}
+          \\&= \card{X'} + \card{Z} = \card{X}
+        \end{align*}
+        より $\card{Y} = \card{X}$ である．
+        ゆえに，$\card{Y} = \card{X}$ かつ $\paren{B_{1} \setmns X} \cup Y \in \Base$
+        なる $Y \subseteq B_{2}$ が存在する．\qed
+      }
+      \lempar[lem:B1-no-proper-subset]{}{
+        有限集合 $S$ と集合族 $\Base \subseteq \Power{S}$ が\eqref{axiom:B1}を満たすならば，
+        \begin{align*}
+          &\forallin{B_{1}|B_{2}}{\Base}{\lflimpl{B_{1} \neq B_{2}}{B_{1} \not\subseteq B_{2}}}
+        \end{align*}
+        が成り立つ．すなわち，$\Base$ のどの $2$ 元も一方が他方を真に包むことはない．
+      }
+      \proof{}{
+        今仮に或る $B_{1}, B_{2}$ が $B_{1} \subsetneq B_{2}$ を満たすとすると，
+        $x \in B_{2} \setmns B_{1}$ がとれるので，\eqref{axiom:B1}より
+        或る $y \in B_{1} \setmns B_{2}$ が存在して $\paren{B_{2} \setmns \setprn{x}} \cup \setprn{y} \in \Base$
+        が成り立つが，$B_{1} \setmns B_{2} = \varnothing$ より矛盾である．\qed
+      }
+      \lempar[lem:B1-same-cardinality]{}{
+        有限集合 $S$ と集合族 $\Base \subseteq \Power{S}$ が\eqref{axiom:B1}を満たすならば，
+        \begin{align*}
+          \forallin{B_{1}|B_{2}}{\Base}{\card{B_{1}} = \card{B_{2}}}
+        \end{align*}
+        が成り立つ．すなわち $\Base$ の元はすべて大きさが相等しい．
+      }
+      \proof{}{
+        今仮に或る $B_{1}, B_{2} \in \Base$ が存在して $\card{B_{1}} > \card{B_{2}}$ を満たしたとする．
+        このとき，$B_{1} \subseteq B_{1}$ と補題\ref{lem:B1-extended-2}より，
+        或る $Y \subseteq B_{2}$ が存在して $\card{Y} = \card{B_{1}}$ かつ $\paren{B_{2} \setmns B_{1}} \cup Y \in \Base$
+        を満たすが，この $Y$ をとると $Y \subseteq B_{2}$ より
+        \begin{align*}
+          \card{B_{1}} &= \card{Y} \leq \card{B_{2}} < \card{B_{1}}
+        \end{align*}
+        が成り立ち矛盾．したがって $\card{B_{1}} > \card{B_{2}}$ なる $B_{1}, B_{2} \in \Base$ は存在せず，
+        $B_{1}, B_{2} \in \Base$ に対して $\card{B_{1}} \leq \card{B_{2}}$．
+        同時に $\card{B_{1}} \geq \card{B_{2}}$ でもあるから，結局 $\card{B_{1}} = \card{B_{2}}$ が成り立つ．\qed
+      }
+      \thmpar*{再掲：基公理}{
+        $S$ を有限集合とする．
+        $\Base \subseteq \Power{S}$ が或る $S$ 上のマトロイドの基族であるための必要十分条件は
+        \begin{align}
+        \tag{B0}&
+          \Base \neq \varnothing
+        \\
+        \tag{B1}&
+          \forallin{B_{1}|B_{2}}{\Base}{\forallin{x}{B_{1} \setmns B_{2}}{
+            \existsin{y}{B_{2} \setmns B_{1}}{\paren{B_{1} \cup \setprn{y}} \setmns \setprn{x} \in \Base}
+          }}
+        \end{align}
+        である．
+      }
+      \proof{}{
+        \subproof{$\limpl$}{
+          マトロイド $M = \seqprn{S, \Indset}$ に対し，
+          $M$ の基族 $\Base$ が\eqref{axiom:B0}および\eqref{axiom:B1}を満たすことを示す．
+          まず\eqref{axiom:I1}より $\varnothing \in \Indset$ であるから，
+          $\Base \defeq \maxl \Indset \neq \varnothing$ すなわち\eqref{axiom:B0}が成り立つ．
+        \decosep
+          また $B_{1}, B_{2} \in \Base$ とし，$x \in B_{2} \setmns B_{1}$ をとると，
+          系\ref{cor:same-size-bases}より $\card{B_{1}} = \card{B_{2}}$．
+          したがって $\card{B_{1} \setmns \setprn{x}} + 1 = \card{B_{1}} = \card{B_{2}}$ であり，
+          \eqref{axiom:I3}を（$U \defeq B_{2}$，$V \defeq B_{1} \setmns \setprn{x}$ として）適用すると，
+          或る $y \in B_{2} \setmns \paren{B_{1} \setmns \setprn{x}}$ が存在して
+          $\paren{B_{1} \setmns \setprn{x}} \cup \setprn{y} \in \Base$ となる．
+          $x \in B_{2} \setmns B_{1}$ より
+            $B_{2} \setmns \paren{B_{1} \setmns \setprn{x}} = B_{2} \setmns B_{1}$，
+          $y \in B_{2} \setmns B_{1}$ に対して
+            $\paren{B_{1} \setmns \setprn{x}} \cup \setprn{y} = \paren{B_{1} \cup \setprn{y}} \setmns \setprn{x}$
+          であるから，結局
+          \begin{align*}
+            \forallin{B_{1}|B_{2}}{\Base}{\forallin{x}{B_{1} \setmns B_{2}}{
+              \existsin{y}{B_{2} \setmns B_{1}}{\paren{B_{1} \cup \setprn{y}} \setmns \setprn{x} \in \Base}
+            }}
+          \end{align*}
+          すなわち\eqref{axiom:B1}が成り立つ．\qed
+        }
+        \subproof{$\backlimpl$}{
+          $\Base \subseteq \Power{S}$ が\eqref{axiom:B0}および\eqref{axiom:B1}を満たすとする．この $\Base$ に対して
+          \begin{align*}
+            \Indset \defeq \setprnsep{X \subseteq S}{\existsin{B}{\Base}{X \subseteq B}}
+          \end{align*}
+          で定めた $\seqprn{S, \Indset}$ が
+          \eqref{axiom:I1}，\eqref{axiom:I2}，\eqref{axiom:I3}をすべて満たし，$\Base$ を基族とするマトロイドであることを示す．
+          まず\eqref{axiom:B0}より $\Base \neq \varnothing$ であるから
+          $\varnothing \subseteq B$ なる $B \in \Base$ が存在し，したがって
+          $\varnothing \in \Indset$ すなわち\eqref{axiom:I1}が成り立つ．
+          また\eqref{axiom:I2}は $\Indset$ の定義より明らかに成り立つ．
+          以降は\eqref{axiom:I3}を示す．$\card{U} = \card{V} + 1$ なる $U, V \in \Indset$ をとると，
+          $\Indset$ の定義より $U \subseteq B_{1}$，$V \subseteq B_{2}$ なる $B_{1}, B_{2} \in \Base$ が存在する．
+          この $B_{1}, B_{2} \in \Base$ をとると，
+          補題\ref{lem:B1-same-cardinality}より $\card{B_{1}} = \card{B_{2}}$ であり，したがって
+          \begin{align*}
+            \card{B_{1} \setmns B_{2}}
+              &= \card{B_{1}} - \card{B_{1} \cap B_{2}}
+            \\&= \card{B_{2}} - \card{B_{1} \cap B_{2}}
+              = \card{B_{2} \setmns B_{1}}
+          \end{align*}
+          より $\card{B_{1} \setmns B_{2}} = \card{B_{2} \setmns B_{1}}$ である．
+          このとき，補題\ref{lem:B1-extended-2}と $B_{1} \setmns V \subseteq B_{1}$ より，
+          或る $Y \subseteq B_{2}$ が存在して $\card{Y} = \card{B_{1} \setmns V}$ かつ
+          $\paren{B_{1} \setmns \paren{B_{1} \setmns V}} \cup Y \in \Base$ を満たす．
+          すなわちこの $Y$ をとると $\card{Y} = \card{B_{1}} - \card{V}$ かつ $V \cup Y \in \Base$ が成り立つ．
+          ここで $Y \subseteq B_{2}$，$B_{2} \setmns U \subseteq B_{2}$ だが，
+          \begin{align*}
+            \card{Y}
+              &= \card{B_{1}} - \card{V}
+            \\&= \card{B_{2}} - \paren{\card{U} - 1}
+            \\&> \card{B_{2}} - \card{U} = \card{B_{2} \setmns U}
+          \end{align*}
+          であるから $Y \not\subseteq B_{2} \setmns U$ が成り立ち，
+          したがって $Y \cap U \neq \varnothing$ であり $x \in Y \cap U$ がとれる．
+          $Y \cap U \subseteq U \setmns V$ より $x \in U \setmns V$ であり，また
+          $V \cup \setprn{x} \subseteq V \cup Y$ かつ $V \cup Y \in \Base$ であるから，$\Indset$ の定義より
+          $V \cup \setprn{x} \in \Indset$ が成り立つ．
+          ゆえに，任意の $\card{U} = \card{V} + 1$ なる $U, V \in \Indset$ に対して
+          或る $x \in U \setmns V$ が存在して $V \cup \setprn{x} \in \Indset$ を満たし，\eqref{axiom:I3}が成り立つ．
+        \decosep
+          以上より，$M = \seqprn{S, \Indset}$ は\eqref{axiom:I1}，\eqref{axiom:I2}，\eqref{axiom:I3}をいずれも満たし，
+          マトロイドである．
+          $M$ の基族が $\Base$ であることは，$\Indset$ の定義と補題\ref{lem:B1-no-proper-subset}より明らかである．\qed
+          % ----
+          \begin{center}
+            \input{img/ven2.tex}
+          \end{center}
+          % ----
+        }
+      }
+      \plainpar{}{
+        基公理の[$\limpl$]が示されたから，
+        基公理の[$\backlimpl$]を証明するための準備で示した\eqref{axiom:B1}から導かれる諸性質は，
+        そのままマトロイドの性質であることがわかる．以下に系として掲げておく．
+      }
+      \corpar[cor:B1-extended]{\eqref{axiom:B1}の拡張}{
+        マトロイド $M = \seqprn{S, \Indset}$ と $M$ の基族 $\Base$ に対して
+        \begin{align*}
+          &\forallin{B_{1}|B_{2}}{\Base}{\forallsub{X}{B_{1} \setmns B_{2}}{\existssub{Y}{B_{2} \setmns B_{1}}{
+            \lfland{\card{Y} = \card{X}}{\paren{B_{1} \setmns X} \cup Y \in \Base}
+          }}}
+        \end{align*}
+        が成り立つ．
+      }
+      \proof{}{
+        基公理と補題\ref{cor:B1-extended}から明らかである．\qed
+      }
+      \corpar[cor:B1-extended-2]{\eqref{axiom:B1}の拡張2}{
+        マトロイド $M = \seqprn{S, \Indset}$ と $M$ の基族 $\Base$ に対して
+        \begin{align*}
+          &\forallin{B_{1}|B_{2}}{\Base}{\forallsub{X}{B_{1}}{\existssub{Y}{B_{2}}{
+            \lfland{\card{Y} = \card{X}}{\paren{B_{1} \setmns X} \cup Y \in \Base}
+          }}}
+        \end{align*}
+        が成り立つ．
+      }
+      \proof{}{
+        基公理と補題\ref{cor:B1-extended-2}から明らかである．\qed
+      }
+      \plainpar{}{
+        以上により基公理を示すことができたのだが，以降で独立集合族を規定する同値な公理を少し見てみよう．
+      }
+      \defpar{公理\eqref{axiom:I3'}}{
+        有限集合 $S$ と $\Indset \subseteq \Power{S}$ に対し，
+        \begin{align*}
+        \tag{I3\textprime}\label{axiom:I3'}&
+          \forallsub{A}{S}{
+            \forallin{Y_{1}|Y_{2}}{\maxl \setprnsep{Y \subseteq A}{Y \in \Indset}}{\card{Y_{1}} = \card{Y_{2}}}
+          }
+        \end{align*}
+        で公理\eqref{axiom:I3'}を定める．
+      }
+      \thmpar[thm:representation-by-I3']{独立集合族の公理の代替}{
+        有限集合 $S$ と $\Indset \subseteq \Power{S}$ に対し，
+        $\Indset$ が\eqref{axiom:I1}，\eqref{axiom:I2}，\eqref{axiom:I3}をすべて満たすことと，
+        $\Indset$ が\eqref{axiom:I1}，\eqref{axiom:I2}，\eqref{axiom:I3'}をすべて満たすこととは同値である．
+      }
+      \proof{}{
+        \subproof{$\limpl$}{
+          \eqref{axiom:I1}，\eqref{axiom:I2}，\eqref{axiom:I3}から\eqref{axiom:I3'}を背理法により示す．
+          或る $A \subseteq S$ と $Y_{1}, Y_{2} \in \maxl \setprnsep{Y \subseteq A}{Y \in \Indset}$ が存在して
+          $\card{Y_{1}} \neq \card{Y_{2}}$ が成り立つと仮定する．
+          $\card{Y_{1}} < \card{Y_{2}}$ として一般性を失わないのでこう定める．
+          定理\ref{thm:augmentation}：増強定理より，$Z \subseteq Y_{2} \setmns Y_{1}$ で
+          $\card{Y_{1} \cup Z} = \card{Y_{2}}$ かつ $Y_{1} \cup Z \in \Indset$ を満たすものが存在する．
+          この $Z$ をとると $Z \neq \varnothing$ および $Z \subseteq Y_{2} \subseteq A$ が成り立つので
+          $Y_{1} \cup Z \in \setprnsep{Y \subseteq A}{Y \in \Indset}$ かつ $Y_{1} \subsetneq Y_{1} \cup Z$ であり，
+          これは $Y_{1}$ の極大性に反し矛盾である．\qed
+        }
+        \subproof{$\backlimpl$}{
+          \eqref{axiom:I1}，\eqref{axiom:I2}，\eqref{axiom:I3'}から\eqref{axiom:I3}を示す．
+          $\card{U} = \card{V} + 1$ なる $U, V \in \Indset$ をとり，$A \defeq U \cup V$ とする．
+          このとき，$U \subseteq X_{1}$，$V \subseteq X_{2}$ なる
+          $X_{1}, X_{2} \in \maxl \setprnsep{X \subseteq A}{X \in \Indset}$ が存在する．
+          この $X_{1}$，$X_{2}$ は\eqref{axiom:I3'}より $\card{X_{1}} = \card{X_{2}}$ を満たす．
+          $\card{X_{2}} = \card{X_{1}} \geq \card{U} = \card{V} + 1$ より
+          $\card{V} < \card{X_{2}}$ であるから $V \subsetneq X_{2}$．
+          したがって $X_{2} \setmns V \neq \varnothing$ であり，
+          $x \in X_{2} \setmns V$ がとれる．この $x$ は $V \cup \setprn{x} \subseteq X_{2}$ を満たすから，
+          $X_{2} \in \Indset$ と\eqref{axiom:I2}より $V \cup \setprn{x} \in \Indset$．
+          ところで $X_{2} \subseteq A = U \cup V$ だったので
+          $X_{2} \setmns V \subseteq U \setmns V$ が成り立ち，$x$ は $x \in U \setmns V$ を満たす．
+        \decosep
+          ゆえに，$\card{U} = \card{V} + 1$ なる任意の $U, V \in \Indset$ に対して
+          $x \in U \setmns V$ が存在して $V \cup \setprn{x} \in \Indset$ を満たす．すなわち\eqref{axiom:I3}が成り立つ．\qed
+        }
+      }
+    % ---- ----
+    \subsection{階数函数に関する性質}
+      \plainpar{}{
+        まずは階数公理の $[\limpl]$ を示す準備として，マトロイドの階数函数がもつ諸性質を示しておこう．
+      }
+      \lempar[lem:independence-and-full-rank]{独立性と最大階数性の一致}{
+        マトロイド $M = \seqprn{S, \Indset}$ と $M$ の階数函数 $\rho$ に対し，
+          $\forallsub{A}{S}{\lflimpleqv{A \in \Indset}{\app{\rho}{A} = \card{A}}}$
+        が成り立つ．
+      }
+      \proof{}{
+        階数函数 $\rho$ の定義からほぼ自明：\quad
+        $A \in \Indset$ とすると，
+          $\app{\rho}{A} = \max \setprnsep{\card{X}}{\lfland{X \subseteq A}{X \in \Indset}} = \card{A}$
+        である．逆に $\app{\rho}{A} = \card{A}$ とすると
+        $\card{A} = \card{X}$ かつ $X \in \Indset$ なる $X \subseteq A$ が存在するが，
+        $\card{A} = \card{X}$ なる $X \subseteq A$ は $A$ のみであるから $A \in \Indset$ である．\qed
+      }
+      \lempar[lem:monotony-of-rank]{階数函数の単調増加性}{
+        マトロイド $M = \seqprn{S, \Indset}$ と $M$ の階数函数 $\rho$ に対し，
+        \begin{align*}
+          &\forallsub{A|B}{S}{\lflimpl{A \subseteq B}{\app{\rho}{A} \leq \app{\rho}{B}}}
+        \end{align*}
+        が成り立つ．
+      }
+      \proof{}{
+        感覚的にもほぼ明らかである：\quad
+        $A \subseteq B$ なる $A, B \subseteq S$ をとると
+        \begin{align*}
+          \setprnsep{\card{X}}{\lfland{X \subseteq A}{X \in \Indset}}
+            &\subseteq \setprnsep{\card{X}}{\lfland{X \subseteq B}{X \in \Indset}}
+        \end{align*}
+        であるから，$\app{\rho}{A} \leq \app{\rho}{B}$ が成り立つ．\qed
+      }
+      \lempar[lem:max-step-of-rank]{}{
+        マトロイド $M = \seqprn{S, \Indset}$ と $M$ の階数函数 $\rho$ に対し，
+          $\forallin{x}{S}{\forallsub{A}{S}{\app{\rho}{A \cup \setprn{x}} \leq \app{\rho}{A} + 1}}$
+        が成り立つ．
+      }
+      \proof{}{
+        まず $x \in A$ のときは自明であるから，以降 $x \in S \setmns A$ のときを考える．
+        $\rho$ の定義より
+        $\card{Y} = \app{\rho}{A \cup \setprn{x}}$ かつ $Y \subseteq A \cup \setprn{x}$ かつ $Y \in \Indset$
+        なる $Y$ が存在するのでこの $Y$ をとる．
+        \begin{itemize}
+        \item $x \not\in Y$ のとき，
+          $Y \subseteq A$ かつ $Y \in \Indset$ であるから
+          \begin{align*}
+            \app{\rho}{A \cup \setprn{x}}
+              &= \card{Y}
+            \\&\leq \max \setprnsep{\card{X}}{\lfland{X \subseteq A}{X \in \Indset}}
+            \\&= \app{\rho}{A}
+          \end{align*}
+          であり，一方補題\ref{lem:monotony-of-rank}より
+          $\app{\rho}{A} \leq \app{\rho}{A \cup \setprn{x}}$ であるから，結局
+          $\app{\rho}{A \cup \setprn{x}} = \app{\rho}{A}$ が成り立ち，
+          $\app{\rho}{A \cup \setprn{x}} \leq \app{\rho}{A} + 1$．\qed
+        \item $x \in Y$ のとき，
+          $x \not\in Z$ なる $Z \subseteq A$ を用いて $Y = Z \cup \setprn{x}$ と書ける．
+          このとき $Y \in \Indset$ と\eqref{axiom:I2}より $Z \in \Indset$ であるから，
+          $Z$ は $Z \subseteq A$ かつ $Z \in \Indset$ を満たし，
+          \begin{align*}
+            \app{\rho}{A}
+              &= \max \setprnsep{\card{X}}{\lfland{X \subseteq A}{X \in \Indset}}
+            \\&\geq \card{Z}
+            \\&= \card{Y} - 1
+            \\&= \app{\rho}{A \cup \setprn{x}} - 1
+          \end{align*}
+          が成り立つ．すなわち $\app{\rho}{A \cup \setprn{x}} \leq \app{\rho}{A} + 1$ である．\qed
+        \end{itemize}
+      }
+      \plainpar{}{
+        続いて階数公理の $[\backlimpl]$ を示すために，
+        \eqref{axiom:R1}，\eqref{axiom:R2}，\eqref{axiom:R3}から導かれる諸性質を示しておこう．
+      }
+      \lempar[lem:range-of-rho]{}{
+        有限集合 $S$ と函数 $\funcdoms{\rho}{\Power{S}}{\setN}$ が\eqref{axiom:R1}，\eqref{axiom:R2}を満たすならば，
+        \begin{align*}
+        %\tag{R1\textprime}
+          &\forallsub{X}{S}{0 \leq \app{\rho}{X} \leq \card{X}}
+        \end{align*}
+        が成り立つ．
+      }
+      \proof{}{
+        集合 $X$ の大きさ $\card{X} \in \setN$ に関する帰納法による．
+        \begin{itemize}
+        \item $\card{X} = 0$ のとき，
+          $X = \varnothing$ であり，
+          \eqref{axiom:R1}より $\app{\rho}{\varnothing} = 0$ であるから明らか．
+        \item $\card{X} \geq 1$ のとき，
+          $x \in X$ をとると，帰納法の仮定より $0 \leq \app{\rho}{X \setmns \setprn{x}} \leq \card{X \setmns \setprn{x}}$．
+          したがって\eqref{axiom:R2}より
+          \begin{align*}
+            \app{\rho}{X}
+              &= \app{\rho}{\paren{X \setmns \setprn{x}} \cup \setprn{x}}
+            \\&\geq \app{\rho}{X \setmns \setprn{x}}
+            \\&\geq 0
+          \end{align*}
+          であり $0 \leq \app{\rho}{X}$．また，やはり\eqref{axiom:R2}より
+          \begin{align*}
+            \app{\rho}{X}
+              &= \app{\rho}{\paren{X \setmns \setprn{x}} \cup \setprn{x}}
+            \\&\leq \app{\rho}{X \setmns \setprn{x}} + 1
+            \\&\leq \card{X \setmns \setprn{x}} + 1
+            \\&= \paren{\card{X} - 1} + 1 = \card{X}
+          \end{align*}
+          であり $\app{\rho}{X} \leq \card{X}$ が成り立つ．
+          ゆえに $0 \leq \app{\rho}{X} \leq \card{X}$．
+        \end{itemize}
+        以上より，任意の $X \subseteq S$ に対して $0 \leq \app{\rho}{X} \leq \card{X}$ が成り立つ．\qed
+      }
+      \complpar{}{
+        上の証明を平易に書けば，$X = \setprn{x_{1}, \ldots, x_{m}}$ とおいて
+        \begin{align*}
+          \app{\rho}{X}
+            &= \app{\rho}{\setprn{x_{1}, \ldots, x_{m - 1}} \cup \setprn{x_{m}}}
+          \\&\geq \app{\rho}{\setprn{x_{1}, \ldots, x_{m - 1}}}
+          \\&\eqdots
+          \\&\geq \app{\rho}{\setprn{x_{1}}}
+          \\&\geq \app{\rho}{\varnothing} = 0
+        \end{align*}
+        および
+        \begin{align*}
+          \app{\rho}{X}
+            &= \app{\rho}{\setprn{x_{1}, \ldots, x_{m - 1}} \cup \setprn{x_{m}}}
+          \\&\leq \app{\rho}{\setprn{x_{1}, \ldots, x_{m - 1}}} + 1
+          \\&\eqdots
+          \\&\leq \app{\rho}{\setprn{x_{1}}} + \paren{m - 1}
+          \\&\leq \app{\rho}{\varnothing} + 1 + \paren{m - 1} = m = \card{X}
+        \end{align*}
+        ということになる．簡潔な場合はこのような有限回の操作を中略する書き方でも良いが，
+        手続きが複雑なものは中略の部分でその妥当性が不明瞭になるおそれがあるので，できるだけ帰納法で書くことにする．
+      }
+      \lempar[lem:R2-max-diff]{}{
+        有限集合 $S$ と $\funcdoms{\rho}{\Power{S}}{\setN}$ が\eqref{axiom:R2}を満たすならば，
+        \begin{align*}
+          \forallsub{X|Z}{S}{\app{\rho}{X \cup Z} \leq \app{\rho}{X} + \card{Z}}
+        \end{align*}
+        が成り立つ．
+      }
+      \proof{}{
+        $Z$ の大きさ $\card{Z}$ に関する帰納法による．
+        \begin{itemize}
+        \item $\card{Z} = 0$ のとき，$Z = \varnothing$ より
+          $\app{\rho}{X \cup Z} = \app{\rho}{X} \leq \app{\rho}{X} + \card{Z}$ であり明らか．
+        \item $\card{Z} \geq 1$ のとき，
+          $z \in Z$ がとれる．$\card{Z \setmns \setprn{z}} < \card{Z}$ であるから，帰納法の仮定より
+          \begin{align*}
+            \app{\rho}{X \cup \paren{Z \setmns \setprn{z}}}
+              \leq \app{\rho}{X} + \card{Z \setmns \setprn{z}} = \app{\rho}{X} + \card{Z} - 1
+          \end{align*}
+          が成り立つ．ここで\eqref{axiom:R2}より
+          \begin{align*}
+            \app{\rho}{X \cup Z}
+              &= \app{\rho}{X \cup \paren{Z \setmns \setprn{z}} \cup \setprn{z}}
+            \\&\leq \app{\rho}{X \cup \paren{Z \setmns \setprn{z}}} + 1
+            \\&\leq \paren{\app{\rho}{X} + \card{Z} - 1} + 1
+            \\&= \app{\rho}{X} + \card{Z}
+          \end{align*}
+          であり，ゆえに $\app{\rho}{X \cup Z} \leq \app{\rho}{X} + \card{Z}$．
+        \end{itemize}
+        以上より，任意の $X, Z \subseteq S$ に対して $\app{\rho}{X \cup Z} \leq \app{\rho}{X} + \card{Z}$．\qed
+      }
+      \lempar[lem:R3-augment-dependence]{}{
+        有限集合 $S$ と $\funcdoms{\rho}{\Power{S}}{\setN}$ が\eqref{axiom:R3}を満たすならば，
+        \begin{align*}
+          &\forallsub{X|Y}{S}{
+            \lflimpl{
+              \forallin{y}{Y}{\app{\rho}{X \cup \setprn{y}} = \app{\rho}{X}}
+            }{
+              \app{\rho}{X \cup Y} = \app{\rho}{X}
+            }
+          }
+        \end{align*}
+        が成り立つ．
+      }
+      \proof{}{
+        $Y$ の大きさ $\card{Y}$ に関する帰納法による．
+        \begin{itemize}
+        \item $\card{Y} = 0$ のとき，$Y = \varnothing$ であり，明らかに成り立つ．
+        \item $\card{Y} = 1$ のとき，$Y = \setprn{y}$ とおけることから明らかに成り立つ．
+        \item $\card{Y} \geq 2$ のとき，
+          $a \neq b$ なる $a, b \in Y$ がとれる．
+          任意の $y \in Y$ に対して $\app{\rho}{X \cup \setprn{y}} = \app{\rho}{X}$ が成り立つとすると，
+          $\card{Y \setmns \setprn{a, b}} < \card{Y}$
+          かつ任意の $y \in Y \setmns \setprn{a, b}$ に対して $\app{\rho}{X \cup \setprn{y}} = \app{\rho}{X}$
+          であるから，帰納法の仮定より
+          \begin{align*}
+            \app{\rho}{X \cup \paren{Y \setmns \setprn{a, b}}} &= \app{\rho}{X}
+          \end{align*}
+          が成り立つ．
+          $Z \defeq X \cup \paren{Y \setmns \setprn{a, b}}$ とすると $\app{\rho}{Z} = \app{\rho}{X}$．
+          $Y \setmns \setprn{a}$ および $Y \setmns \setprn{b}$ についても同様に帰納法の仮定より
+          \begin{align*}
+            \app{\rho}{X \cup \paren{Y \setmns \setprn{a}}} &= \app{\rho}{X}
+          \\
+            \app{\rho}{X \cup \paren{Y \setmns \setprn{b}}} &= \app{\rho}{X}
+          \end{align*}
+          が成り立つ．このとき
+          \begin{align*}
+            \app{\rho}{Z \cup \setprn{a}} &= \app{\rho}{X \cup \paren{Y \setmns \setprn{b}}} = \app{\rho}{X} = \app{\rho}{Z}
+          \\
+            \app{\rho}{Z \cup \setprn{b}} &= \app{\rho}{X \cup \paren{Y \setmns \setprn{a}}} = \app{\rho}{X} = \app{\rho}{Z}
+          \end{align*}
+          であるから，\eqref{axiom:R3}より $\app{\rho}{Z \cup \setprn{a} \cup \setprn{b}} = \app{\rho}{Z}$，
+          すなわち $\app{\rho}{X \cup Y} = \app{\rho}{X}$ が成り立つ．
+        \end{itemize}
+        以上より示された．\qed
+      }
+      \complpar{}{
+        上の補題の証明でやっていることはなにやらわかりづらいが，
+        実際に“大きさの小さい方から示していく”ことを試すと実感が湧く．
+        任意の $y_{1} \in Y$ に対して $\app{\rho}{X \cup \setprn{y_{1}}} = \app{\rho}{X}$ が成り立つとすると，
+        勿論任意の $y_{1}, y_{2} \in Y$ に対して
+        \begin{align*}
+          \app{\rho}{X \cup \setprn{y_{1}}} &= \app{\rho}{X \cup \setprn{y_{2}}} = \app{\rho}{X}
+        \end{align*}
+        であるから，\eqref{axiom:R3}より
+        \begin{align*}
+          \app{\rho}{X \cup \setprn{y_{1}} \cup \setprn{y_{2}}} = \app{\rho}{X}
+        \end{align*}
+        が成り立つ．これも $y_{1}, y_{2} \in Y$ は任意であったから，さらに任意の $y_{1}, y_{2}, y_{3} \in Y$ に対して
+        \begin{align*}
+          \app{\rho}{X \cup \setprn{y_{1}} \cup \setprn{y_{2}}}
+            &= \app{\rho}{X \cup \setprn{y_{1}} \cup \setprn{y_{3}}} = \app{\rho}{X} = \app{\rho}{X \cup \setprn{y_{1}}}
+        \end{align*}
+        が成り立ち，やはり\eqref{axiom:R3}より
+        \begin{align*}
+          \app{\rho}{\paren{X \cup \setprn{y_{1}}} \cup \setprn{y_{2}} \cup \setprn{y_{3}}}
+            &= \app{\rho}{X \cup \setprn{y_{1}}}
+            = \app{\rho}{X}
+        \end{align*}
+        となる．こうして“ひとつずつ増やしていく”ことにより，$m \defeq \card{Y}$ とすると
+        やがて任意の $y_{1}, \ldots, y_{m} \in Y$ に対して
+          $\app{\rho}{X \cup \setprn{y_{1}} \cup \cdots \cup \setprn{y_{m}}} = \app{\rho}{X}$
+        に到達し，$y_{1}, \ldots, y_{m}$ に $Y$ の相異なる元をあてることで
+        $\app{\rho}{X \cup Y} = \app{\rho}{X}$ が示せるのである．
+      }
+      \plainpar{}{
+        さて，これで階数公理を示す準備ができたので，実際に以下で示してみよう．
+      }
+      \thmpar*{再掲：階数公理}{
+        $S$ を有限集合とする．
+        $\funcdoms{\rho}{\Power{S}}{\setN}$ が或る $S$ 上のマトロイドの階数函数であるための必要十分条件は
+        \begin{align}
+        \tag{R1}&
+          \app{\rho}{\varnothing} = 0
+        \\
+        \tag{R2}&
+          \forallsub{X}{S}{\forallin{y}{S}{
+            \app{\rho}{X} \leq \app{\rho}{X \cup \setprn{y}} \leq \app{\rho}{X} + 1
+          }}
+        \\
+        \tag{R3}&
+          \forallsub{X}{S}{\forallin{y|z}{S}{
+            \lflimpl{
+              \app{\rho}{X \cup \setprn{y}} = \app{\rho}{X \cup \setprn{z}} = \app{\rho}{X}
+            }{
+              \app{\rho}{X \cup \setprn{y} \cup \setprn{z}} = \app{\rho}{X}
+            }
+          }}
+        \end{align}
+        である．
+      }
+      \proof{}{
+        \subproof{$\limpl$}{
+          \eqref{axiom:I1}，\eqref{axiom:I2}，\eqref{axiom:I3}を満たす $M = \seqprn{S, \Indset}$ に対し，
+          $M$ の階数函数 $\rho$ が\eqref{axiom:R1}，\eqref{axiom:R2}，\eqref{axiom:R3}を満たすことを示す．
+          \eqref{axiom:R1}は\eqref{axiom:I1}より
+            $\app{\rho}{\varnothing}
+              = \setprnsep{\card{X}}{\lfland{X \subseteq \varnothing}{X \in \Indset}}
+              = \card{\varnothing} = 0$
+          と簡単に示せる．\eqref{axiom:R2}も，$X \subseteq S$ と $y \in S$ に対して補題\ref{lem:monotony-of-rank}より
+            $\app{\rho}{X} \leq \app{\rho}{X \cup \setprn{y}}$，
+          補題\ref{lem:max-step-of-rank}より
+            $\app{\rho}{X \cup \setprn{y}} \leq \app{\rho}{X} + 1$
+          であるから容易である．以降\eqref{axiom:R3}を背理法により示す．
+        \decosep
+          いま仮に
+            $\app{\rho}{X \cup \setprn{y}} = \app{\rho}{X \cup \setprn{z}} = \app{\rho}{X}$
+          かつ
+            $\app{\rho}{X \cup \setprn{y} \cup \setprn{z}} \neq \app{\rho}{X}$
+          なる $X \subseteq S$ と $y, z \in S$ が存在するとする．
+          $X \subseteq X \cup \setprn{y} \cup \setprn{z}$ と
+          補題\ref{lem:monotony-of-rank}：階数函数の単調性より
+            $\app{\rho}{X} \leq \app{\rho}{X \cup \setprn{y} \cup \setprn{z}}$
+          であるから，結局
+            $\app{\rho}{X \cup \setprn{y} \cup \setprn{z}} > \app{\rho}{X}$
+          が成り立つ．このとき，階数函数 $\rho$ の定義より
+            $\app{\rho}{X} = \card{Y}$ かつ $Y \subseteq X$
+          なる $Y \in \Indset$ と，
+            $\app{\rho}{X \cup \setprn{y} \cup \setprn{z}} = \card{Z}$ かつ $Z \subseteq X \cup \setprn{y} \cup \setprn{z}$
+          なる $Z \in \Indset$ がそれぞれ存在する．
+          この $Y$ と $Z$ は仮定
+            $\app{\rho}{X \cup \setprn{y} \cup \setprn{z}} > \app{\rho}{X}$
+          より $\card{Z} > \card{Y}$ を満たし，定理\ref{thm:augmentation}：増強定理より，
+          或る $W \subseteq Z \setmns Y$ が存在して
+          $Y \cup W \in \Indset$ かつ $\card{Y \cup W} = \card{Z}$ が成り立つ．
+          この $W$ が仮に $y \not\in W$ かつ $z \not\in W$ を満たしたとすると，
+          $Y \cup W \subseteq X$ かつ $Y \cup W \in \Indset$ より
+          \begin{align*}
+            \card{Z}
+              = \card{Y \cup W}
+              \leq \max \setprnsep{\card{A}}{\lfland{A \subseteq X}{A \in \Indset}}
+              = \app{\rho}{X}
+              = \card{Y}
+              < \card{Z}
+          \end{align*}
+          となって矛盾するので，$y \in W$ または $z \in W$ である．
+          $y \in W$ として一般性を失わないのでこう定める．
+          このとき，$W \subseteq Z \setmns Y$ より $y \not\in Y$．
+          また，$Y \cup W \in \Indset$，$Y \cup \setprn{y} \subseteq Y \cup W$，\eqref{axiom:I2}より
+          $Y \cup \setprn{y} \in \Indset$ であり，補題\ref{lem:independence-and-full-rank}より
+          \begin{align*}
+            \app{\rho}{Y \cup \setprn{y}}
+              &= \card{Y \cup \setprn{y}}
+            \\&= \card{Y} + 1
+            \\&= \app{\rho}{X} + 1
+          \end{align*}
+          が成り立つ．一方補題\ref{lem:monotony-of-rank}：階数函数の単調性より
+          \begin{align*}
+            \app{\rho}{Y \cup \setprn{y}} \leq \app{\rho}{X \cup \setprn{y}}
+          \end{align*}
+          であり，結局 $\app{\rho}{X} + 1 \leq \app{\rho}{X \cup \setprn{y}}$ が成り立ち
+          $\app{\rho}{X} = \app{\rho}{X \cup \setprn{y}}$ に矛盾．
+        \decosep
+          ゆえに，任意の $X \subseteq S$ と $y, z \in S$ に対して，
+            $\app{\rho}{X \cup \setprn{y}} = \app{\rho}{X \cup \setprn{z}} = \app{\rho}{X}$
+          ならば
+            $\app{\rho}{X \cup \setprn{y} \cup \setprn{z}} = \app{\rho}{X}$
+          である．すなわち\eqref{axiom:R3}が成り立つ．\qed
+        }
+        \subproof{$\backlimpl$}{
+          \eqref{axiom:R1}，\eqref{axiom:R2}，\eqref{axiom:R3}を満たす $\rho$ に対し，
+          \begin{align*}
+            \Indset \defeq \setprnsep{X \subseteq S}{\app{\rho}{X} = \card{X}}
+          \end{align*}
+          で定めた $\seqprn{S, \Indset}$ が\eqref{axiom:I1}，\eqref{axiom:I2}，\eqref{axiom:I3}を満たし，
+          $\rho$ を階数函数とするマトロイドであることを示す．
+        \decosep
+          まず\eqref{axiom:R1}より $\app{\rho}{\varnothing} = 0 = \card{\varnothing}$ であるから
+          $\varnothing \in \Indset$ すなわち\eqref{axiom:I1}が成り立つ．
+        \decosep
+          次に\eqref{axiom:I2}を背理法で示す．
+          仮に $X \in \Indset$ に対して或る $Y \subseteq X$ が存在して $Y \not\in \Indset$ を満たすとする．
+          このとき $\Indset$ の定義より $\app{\rho}{Y} \neq \card{Y}$．
+          補題\ref{lem:range-of-rho}より $\app{\rho}{Y} \leq \card{Y}$ であるから，結局 $\app{\rho}{Y} < \card{Y}$．
+          このとき，補題\ref{lem:R2-max-diff}より
+            $\app{\rho}{Y \cup \paren{X \setmns Y}} \leq \app{\rho}{Y} + \card{X \setmns Y}$
+          であり，
+          \begin{align*}
+            \app{\rho}{X}
+              &= \app{\rho}{Y \cup \paren{X \setmns Y}}
+            \\&\leq \app{\rho}{Y} + \card{X \setmns Y}
+            \\&< \card{Y} + \card{X \setmns Y} = \card{X}
+          \end{align*}
+%          $k \defeq \card{Y \setmns X}$ を用いて 
+%          $Y \setmns X = \setprn{c_{1}, \ldots, c_{k}}$ とおくと，
+%          \begin{align*}
+%            \app{\rho}{X}
+%              &= \app{\rho}{Y \cup \paren{X \setmns Y}}
+%            \\&= \app{\rho}{Y \cup \setprn{c_{1}, \ldots, c_{k - 1}, c_{k}}}
+%            \\&\leq \app{\rho}{Y \cup \setprn{c_{1}, \ldots, c_{k - 1}}} + 1
+%            \\&\eqdots
+%            \\&\leq \app{\rho}{Y \cup \setprn{c_{1}}} + \paren{k - 1}
+%            \\&\leq \app{\rho}{Y} + k
+%            \\&< \card{Y} + k = \card{Y} + \card{X \setmns Y} = \card{X}
+%          \end{align*}
+          より $\app{\rho}{X} < \card{X}$，すなわち $X \not\in \Indset$ が成り立ち矛盾．
+          よって任意の $X, Y \subseteq S$ に対して $Y \subseteq X$ かつ $X \in \Indset$ ならば $Y \in \Indset$ であり，
+          \eqref{axiom:I2}が成り立つ．
+        \decosep
+          最後に\eqref{axiom:I3}を背理法により示す．
+          いま仮に或る $U, V \in \Indset$ が $\card{U} = \card{V} + 1$ かつ
+          任意の $z \in U \setmns V$ に対して $V \cup \setprn{z} \not\in \Indset$ を満たすとする．
+          すなわち $z \in U \setmns V$ を任意に選ぶと
+          $\app{\rho}{V \cup \setprn{z}} \neq \card{V \cup \setprn{z}} = \card{V} + 1$ である．
+          これに加えて\eqref{axiom:R2}より
+            $\app{\rho}{V} \leq \app{\rho}{V \cup \setprn{z}} \leq \app{\rho}{V} + 1$，
+          また $V \in \Indset$ より $\card{V} = \app{\rho}{V}$ であるから，結局
+            $\app{\rho}{V \cup \setprn{z}} = \app{\rho}{V}$
+          が成り立つ．以上より
+          \begin{align*}
+            \forallin{z}{U \setmns V}{\app{\rho}{V \cup \setprn{z}} = \app{\rho}{V}}
+          \end{align*}
+          であるから，補題\ref{lem:R3-augment-dependence}より
+            $\app{\rho}{V \cup \paren{U \setmns V}} = \app{\rho}{V}$
+          が成り立つ．すなわち
+            $\app{\rho}{U \cup V} = \card{V}$
+          である．ここで $U \subseteq U \cup V$ と補題\ref{lem:range-of-rho}より
+            $\app{\rho}{U} \leq \app{\rho}{U \cup V}$
+          であり，また $U \in \Indset$ より $\card{U} = \app{\rho}{U}$ であるから，したがって
+          \begin{align*}
+            \card{V} + 1
+              &=\card{U}
+            \\&= \app{\rho}{U}
+            \\&\leq \app{\rho}{U \cup V}
+              = \card{V}
+          \end{align*}
+          が成り立ち矛盾．
+%          $q \defeq \card{U \cap V}$，$m \defeq \card{V}$ とすると $\card{U} = m + 1$ であり，
+%          \begin{align*}
+%            U \cap V    &\defeq \setprn{x_{1}, \ldots, x_{q}}
+%          \\
+%            V \setmns U &\defeq \setprn{y_{q + 1}, \ldots, y_{m}}
+%          \\
+%            U \setmns V &\defeq \setprn{z_{q + 1}, \ldots, z_{m} + z_{m + 1}}
+%          \end{align*}
+%          とおける．
+%          $z_{i} \in U \setmns V$ を任意に選ぶと，仮定より $V \cup \setprn{z_{i}} \not\in \Indset$ すなわち
+%          $\app{\rho}{V \cup \setprn{z_{i}}} \neq \card{V \cup \setprn{z_{i}}} = m + 1$ である．
+%          これに加えて\eqref{axiom:R2}より
+%            $\app{\rho}{V} \leq \app{\rho}{V \cup \setprn{z_{i}}} \leq \app{\rho}{V} + 1$，
+%          また $V \in \Indset$ より $m = \card{V} = \app{\rho}{V}$ であるから，結局
+%            $\app{\rho}{V \cup \setprn{z_{i}}} = \app{\rho}{V}$
+%          が成り立つ．$z_{i}$ は任意だったので，さらに任意の $z_{i}, z_{j} \in U \setmns V$ に対して
+%          \begin{align*}
+%            \app{\rho}{V \cup \setprn{z_{i}}} = \app{\rho}{V \cup \setprn{z_{j}}} = \app{\rho}{V}
+%          \end{align*}
+%          が成り立ち，\eqref{axiom:R3}より
+%          \begin{align*}
+%            \app{\rho}{V \cup \setprn{z_{i}} \cup \setprn{z_{j}}} = \app{\rho}{V}
+%          \end{align*}
+%          が成り立つ．
+%          同様に任意の $z_{i}, z_{j}, z_{k} \in U \setmns V$ に対して
+%          \begin{align*}
+%            \app{\rho}{\paren{V \cup \setprn{z_{i}}} \cup \setprn{z_{j}}}
+%              = \app{\rho}{\paren{V \cup \setprn{z_{i}}} \cup \setprn{z_{k}}}
+%              = \app{\rho}{V \cup \setprn{z_{i}}}
+%          \end{align*}
+%          であるから\eqref{axiom:R3}より
+%          \begin{align*}
+%            \app{\rho}{\paren{V \cup \setprn{z_{i}}} \cup \setprn{z_{j}} \cup \setprn{z_{k}}}
+%              = \app{\rho}{V \cup \setprn{z_{i}}} = \app{\rho}{V}
+%          \end{align*}
+%          が成り立つ．このように\eqref{axiom:R3}を繰り返し適用することで
+%          階数を増やさずに $V$ に $U \setmns V$ の元をいくらでも追加することができるので，
+%          \begin{align*}
+%            \card{U} = \app{\rho}{U}
+%              &\leq \app{\rho}{U \cup \setprn{y_{q + 1}}}
+%            \\&\leq \app{\rho}{U \cup \setprn{y_{q + 1}} \cup \setprn{y_{q + 2}}}
+%            \\&\eqdots
+%            \\&\leq \app{\rho}{U \cup \setprn{y_{q + 1}} \cup \cdots \cup \setprn{y_{m}}}
+%            \\&= \app{\rho}{U \cup V}
+%            \\&= \app{\rho}{V \cup \paren{U \setmns V}}
+%            \\&= \app{\rho}{V \cup \setprn{z_{q + 1}} \cup \cdots \cup \setprn{z_{m + 1}}}
+%            \\&= \app{\rho}{V} = \card{V}
+%          \end{align*}
+%          より $\card{U} \leq \card{V}$ が成り立ち，これは $\card{U} = \card{V} + 1$ に反し矛盾．
+          ゆえに任意の $\card{U} = \card{V} + 1$ なる $U, V \in \Indset$ に対して
+          或る $z \in U \setmns V$ が存在して $V \cup \setprn{z} \in \Indset$ を満たし，
+          \eqref{axiom:I3}が成り立つ．
+        \decosep
+          以上より，\eqref{axiom:R1}，\eqref{axiom:R2}，\eqref{axiom:R3}を満たす $\rho$ に対して
+          $\Indset \defeq \setprnsep{X \subseteq S}{\app{\rho}{X} = \card{X}}$ で定めた
+          $M = \seqprn{S, \Indset}$ はマトロイドである．
+          $M$ の階数函数を $r$ とおくと，$A \subseteq S$ に対して
+          \begin{align*}
+            \app{r}{A} &\defeq \setprnsep{\card{X}}{\lfland{X \subseteq A}{X \in \Indset}}
+          \end{align*}
+          である．$\card{X} = \app{r}{A}$ かつ $X \subseteq A$ なる $X \in \Indset$ が存在し，
+          $\Indset$ の定義より $\app{\rho}{X} = \card{X} = \app{r}{A}$．
+          ここで任意に $w \in A \setmns X$ を選ぶ．
+          仮に $X \cup \setprn{w} \in \Indset$ であるとすると $X$ の極大性に矛盾，すなわち
+          $X \cup \setprn{w} \subseteq A$ かつ $X \cup \setprn{w} \in \Indset$ より
+          \begin{align*}
+            \card{X}
+              &< \card{X \cup \setprn{w}}
+            \\&\leq \max \setprnsep{\card{Y}}{\lfland{Y \subseteq A}{Y \in \Indset}}
+            \\&= \app{r}{A}
+              = \card{X}
+          \end{align*}
+          となって矛盾するので，$X \cup \setprn{w} \not\in \Indset$ が成り立つ．
+          よって $\app{\rho}{X \cup \setprn{w}} \neq \card{X \cup \setprn{w}}$ であり，
+          やはり $\card{X} = \app{\rho}{X}$ と\eqref{axiom:R2}より $\app{\rho}{X \cup \setprn{w}} = \app{\rho}{X}$．
+          $w \in A \setmns X$ は任意であったから，補題\ref{lem:R3-augment-dependence}より
+          $\app{\rho}{A} = \app{\rho}{X \cup \paren{A \setmns X}} = \app{\rho}{X}$ が成り立つ．
+          以上より $\app{\rho}{A} = \app{\rho}{X} = \app{r}{A}$ であり，
+          任意の $A \subseteq S$ に対して $\app{\rho}{A} = \app{r}{A}$ であるから $\rho = r$，
+          すなわち $\rho$ は $M$ の階数函数である．\qed
+        }
+      }
+      \plainpar{}{
+        ところで，最初に階数公理\eqref{axiom:R1}，\eqref{axiom:R2}，\eqref{axiom:R3}と並べて
+        階数公理の別版\eqref{axiom:R1'}，\eqref{axiom:R2'}，\eqref{axiom:R3'}を挙げた．
+        階数公理は $x \in S$ などと“$S$ の元の階層”にも直接言及しているのに対して，
+        別版は“$S$ の階層”で完結した表現である．
+        特に\eqref{axiom:R3'}は\newwordjaen{劣モジュラ律}{submodularity}と呼ばれる重要な性質である．
+        以下でその同値性を示そう．
+      }
+      \thmpar*{再掲：階数公理別版}{
+        $S$ を有限集合とする．
+        $\funcdoms{\rho}{\Power{S}}{\setN}$ が或る $S$ 上のマトロイドの階数函数であるための必要十分条件は
+        \begin{align}
+        \tag{R1\textprime}&
+          \forallsub{X}{S}{0 \leq \app{\rho}{X} \leq \card{X}}
+        \\
+        \tag{R2\textprime}&
+          \forallsub{X|Y}{S}{\lflimpl{X \subseteq Y}{\app{\rho}{X} \leq \app{\rho}{Y}}}
+        \\
+        \tag{R3\textprime}&
+          \forallsub{X|Y}{S}{\app{\rho}{X \cup Y} + \app{\rho}{X \cap Y} \leq \app{\rho}{X} + \app{\rho}{Y}}
+        \end{align}
+        である．
+      }
+      \proof{}{
+        \subproof{$\limpl$}{
+          \eqref{axiom:R1'}および\eqref{axiom:R2'}は
+          それぞれ補題\ref{lem:range-of-rho}と補題\ref{lem:monotony-of-rank}で既に示したので，
+          以降はマトロイド $M = \seqprn{S, \Indset}$ の階数函数 $\rho$ が\eqref{axiom:R3'}を満たすことを示す．
+        \decosep
+          $X, Y \subseteq S$ とする．$\rho$ の定義より
+          $\card{P} = \app{\rho}{X \cap Y}$ かつ $P \subseteq X \cap Y$ なる $P \in \Indset$ と
+          $\card{Q} = \app{\rho}{X \cup Y}$ かつ $Q \subseteq X \cup Y$ なる $Q \in \Indset$ がそれぞれ存在するので，
+          これらの $P, Q \in \Indset$ をとる．
+          このとき，$X \cap Y \subseteq X \cup Y$ と補題\ref{lem:monotony-of-rank}：階数函数の単調性より
+          $\app{\rho}{X \cap Y} \leq \app{\rho}{X \cup Y}$ であり，したがって $\card{P} \leq \card{Q}$．
+          \begin{itemize}
+          \item $\card{P} = \card{Q}$ のとき，$P \in \Indset$，$P \subseteq X$，$P \subseteq Y$ より
+            $\card{P} \leq \app{\rho}{X}$，$\card{P} \leq \app{\rho}{Y}$ である．したがって
+            \begin{align*}
+              \app{\rho}{X \cap Y} + \app{\rho}{X \cup Y}
+                &= \card{P} + \card{Q}
+                = \card{P} + \card{P}
+                \leq \app{\rho}{X} + \app{\rho}{Y}
+            \end{align*}
+            が成り立つ．
+          \item $\card{P} < \card{Q}$ のとき，定理\ref{thm:augmentation}：増強定理より，
+            或る $Z \subseteq Q \setmns P$ が存在して $\card{P \cup Z} = \card{Q}$ かつ $P \cup Z \in \Indset$ が成り立つから，
+            この $Z$ を用いて $W \defeq P \cup Z$ と定める．$P \subseteq W \cap \paren{X \cap Y}$ であるが，
+            ここで仮に $P \subsetneq W \cap \paren{X \cap Y}$ であるとすると，
+            $W \in \Indset$ から\eqref{axiom:I2}より $W \cap \paren{X \cap Y} \in \Indset$ であり，
+            $W \cap \paren{X \cap Y} \subseteq X \cap Y$ より $P$ の極大性に反して矛盾，すなわち
+            \begin{align*}
+              \card{P}
+                &< \card{W \cap \paren{X \cap Y}}
+              \\&\leq \app{\rho}{X \cap Y} = \card{P}
+            \end{align*}
+            により矛盾する．したがって $P = W \cap \paren{X \cap Y}$ である．ここで
+            $U \defeq W \cap \paren{X \setmns Y}$，$V \defeq W \cap \paren{Y \setmns X}$ と定めると，
+            $U \cap P = \varnothing$，$V \cap P = \varnothing$，
+            $U \cap V = \varnothing$，$Q = U \cup P \cup V$ であるから
+            \begin{align*}
+              %\card{W \cap X} + \card{W \cap Y}
+              %  &= \paren{\card{W \cap \paren{X \setmns Y}} + \card{W \cap \paren{X \cap Y}}}
+              %    + \paren{\card{W \cap \paren{Y \setmns X}} + \card{W \cap \paren{X \cap Y}}}
+              \card{U \cup P} + \card{V \cup P}
+                &= \card{U} + \card{P} + \card{V} + \card{P}
+              \\&= \card{Q} + \card{P}
+              \\&= \app{\rho}{X \cup Y} + \app{\rho}{X \cap Y}
+            \end{align*}
+            が成り立つ．さらに $U \cup P \subseteq Q$，$V \cup P \subseteq Q$ から
+            \eqref{axiom:I2}より $U \cup P \in \Indset$，$V \cup P \in \Indset$ であり，
+            $U \cup P \subseteq X$ および $V \cup P \subseteq Y$ より
+            \begin{align*}
+              \card{U \cup P} &\leq \app{\rho}{X}
+            &
+              \card{V \cup P} &\leq \app{\rho}{Y}
+            \end{align*}
+            であるから，結局
+            \begin{align*}
+              \app{\rho}{X \cup Y} + \app{\rho}{X \cap Y} \leq \app{\rho}{X} + \app{\rho}{Y}
+            \end{align*}
+            が成り立つ．
+            % ----
+            \begin{center}
+              \input{img/ven3.tex}
+            \end{center}
+            % ----
+          \end{itemize}
+          以上より，任意の $X, Y \subseteq S$ に対して
+            $\app{\rho}{X \cup Y} + \app{\rho}{X \cap Y} \leq \app{\rho}{X} + \app{\rho}{Y}$
+          が成り立つ．\qed
+        }
+        \subproof{$\backlimpl$}{
+          階数公理より，\eqref{axiom:R1'}，\eqref{axiom:R2'}，\eqref{axiom:R3'}を満たす $\rho$ が
+          \eqref{axiom:R1}，\eqref{axiom:R2}，\eqref{axiom:R3}を満たすことを示せば十分である．
+        %\decosep
+          まず\eqref{axiom:R1'}より $0 \leq \app{\rho}{\varnothing} \leq \card{\varnothing} = 0$ であり，
+          $\app{\rho}{\varnothing} = 0$，すなわち\eqref{axiom:R1}が成り立つ．
+        %\decosep
+          次に\eqref{axiom:R2}を示す．$X \subseteq S$，$y \in S$ を任意にとると，
+          $X \subseteq X \cup \setprn{y}$ と\eqref{axiom:R2'}より $\app{\rho}{X} \leq \app{\rho}{X \cup \setprn{y}}$．
+          \begin{itemize}
+          \item $X \cap \setprn{y} \neq \varnothing$ のとき，$y \in X$ より $X \cup \setprn{y} = X$ であり，
+            $\app{\rho}{X \cup \setprn{y}} = \app{\rho}{X} \leq \app{\rho}{X} + 1$．
+          \item $X \cap \setprn{y} = \varnothing$ のとき，$y \not\in X$ であり，
+            \eqref{axiom:R3'}および既に示した\eqref{axiom:R1}より
+            \begin{align*}
+              \app{\rho}{X} + \app{\rho}{\setprn{y}}
+                &\geq \app{\rho}{X \cup \setprn{y}} + \app{\rho}{X \cap \setprn{y}}
+              \\&= \app{\rho}{X \cup \setprn{y}} + \app{\rho}{\varnothing}
+              \\&= \app{\rho}{X \cup \setprn{y}}
+            \end{align*}
+            が成り立つ．\eqref{axiom:R1'}より $0 \leq \app{\rho}{\setprn{y}} \leq \card{\setprn{y}} = 1$ であるから，結局
+            \begin{align*}
+              \app{\rho}{X \cup \setprn{y}}
+                &\leq \app{\rho}{X} + \app{\rho}{\setprn{y}}
+                \leq \app{\rho}{X} + 1
+            \end{align*}
+            が成り立つ．
+          \end{itemize}
+          以上より，任意の $X \subseteq S$ と $y \in S$ に対して
+            $\app{\rho}{X} \leq \app{\rho}{X \cup \setprn{y}} \leq \app{\rho}{X} + 1$
+          であり，\eqref{axiom:R2}が成り立つ．
+        %\decosep
+          最後に\eqref{axiom:R3}を示す．
+          \begin{itemize}
+          \item $x \in X$ のとき，$X \cup \setprn{x} = X$ であるから，
+            $\app{\rho}{X \cup \setprn{x}} = \app{\rho}{X \cup \setprn{y}} = \app{\rho}{X}$ とすると即座に
+              $\app{\rho}{\paren{X \cup \setprn{x}} \cup \setprn{y}} = \app{\rho}{X \cup \setprn{y}} = \app{\rho}{X}$
+            が成り立ち，明らか．
+          \item $y \in X$ のとき，上と同様に明らか．
+          \item $x \not\in X$ かつ $y \not\in X$ のとき，
+            $\app{\rho}{X \cup \setprn{x}} = \app{\rho}{X \cup \setprn{y}} = \app{\rho}{X}$ とすると，
+            まず $X \subseteq X \cup \setprn{x} \cup \setprn{y}$ と\eqref{axiom:R2'}より
+            $\app{\rho}{X} \leq \app{\rho}{X \cup \setprn{x} \cup \setprn{y}}$ が成り立つ．
+            一方，\eqref{axiom:R3'}より
+            \begin{align*}
+              \app{\rho}{X} + \app{\rho}{X}
+                &= \app{\rho}{X \cup \setprn{x}} + \app{\rho}{X \cup \setprn{y}}
+              \\&\geq \app{\rho}{\paren{X \cup \setprn{x}} \cup \paren{X \cup \setprn{y}}}
+                  + \app{\rho}{\paren{X \cup \setprn{x}} \cap \paren{X \cup \setprn{y}}}
+              \\&= \app{\rho}{X \cup \setprn{x} \cup \setprn{y}} + \app{\rho}{X}
+            \end{align*}
+            であり，$\app{\rho}{X} \geq \app{\rho}{X \cup \setprn{x} \cup \setprn{y}}$ が成り立つから，
+            結局 $\app{\rho}{X \cup \setprn{x} \cup \setprn{y}} = \app{\rho}{X}$ である．
+          \end{itemize}
+            以上より，\eqref{axiom:R3}が成り立つ．\qed
+        }
+      }
+    % ---- ----
+    \subsection{平坦集合と閉包演算子に関する性質}
+      \lempar[lem:augment-of-closure]{閉包演算子の増大性}{
+        マトロイド $M = \seqprn{S, \Indset}$，$M$ の閉包演算子 $\sigma$ に対し，
+          $\forallsub{A}{S}{A \subseteq \app{\sigma}{A}}$
+        が成り立つ．
+      }
+      \proof{}{
+        $M$ の階数函数を $\rho$ とおき，$A \subseteq S$ とする．
+      \decosep
+        $x \in A$ とすると $A \cup \setprn{x} = A$ より
+        $\app{\rho}{A \cup \setprn{x}} = \app{\rho}{A}$，すなわち $x \dependson A$ であるから
+        $x \in \app{\sigma}{A}$ が成り立つ．ゆえに $A \subseteq \app{\sigma}{A}$ である．\qed
+      }
+      \lempar[lem:flatness-and-dependence]{}{
+        マトロイド $M = \seqprn{S, \Indset}$ に対して
+          $\forallin{F}{\Flatof{M}}{\forallin{x}{S}{\lflimpl{x \dependson F}{x \in F}}}$
+        が成り立つ．
+      }
+      \proof{}{
+        平坦集合 $F \in \Flatof{M}$ に対して $x \dependson F$ なる $x \in S$ をとると，
+        従属性の定義より $\app{\rho}{F \cup \setprn{x}} = \app{\rho}{F}$．
+        ここで仮に $x \in S \setmns F$ とすると，平坦性の定義より
+        $\app{\rho}{F \cup \setprn{x}} = \app{\rho}{F} + 1$ となり矛盾する．
+        したがって $x \in F$ である．\qed
+      }
+      \complpar{}{
+        “元ならば従属”は一般に成り立つが，平坦集合ではさらに“従属ならば元”が成り立つ．
+        つまり平坦集合 $F$ に対しては $F$ に従属な元全体と $F$ 自身が一致するのである．
+      }
+      \lempar[lem:flatness-of-closure]{閉包の平坦性}{
+        マトロイド $M = \seqprn{S, \Indset}$ と $M$ の閉包演算子 $\sigma$ に対し，
+        $\forallsub{A}{S}{\app{\sigma}{A} \in \Flatof{M}}$ が成り立つ．
+      }
+      \proof{}{
+        $M$ の階数函数を $\rho$ とおき，$A \subseteq S$ とする．
+      \decosep
+        $x \in S \setmns \app{\sigma}{A}$ を任意にとると $\app{\sigma}{A}$ の定義より $x \notdependson A$，
+        すなわち $\app{\rho}{A \cup \setprn{x}} \neq \app{\rho}{A}$ である．
+        また補題\ref{lem:monotony-of-rank}：階数函数の単調増加性より
+          $\app{\rho}{A} \leq \app{\rho}{A \cup \setprn{x}}$
+        であり，
+          $\app{\rho}{A} + 1 \leq \app{\rho}{A \cup \setprn{x}}$
+        が成り立つ．一方補題\ref{lem:max-step-of-rank}より
+          $\app{\rho}{A \cup \setprn{x}} \leq \app{\rho}{A} + 1$
+        も成り立つから，結局
+          $\app{\rho}{A \cup \setprn{x}} = \app{\rho}{A} + 1$
+        である．
+      \decosep
+        ゆえに $\forallin{x}{S \setmns \app{\sigma}{A}}{\app{\rho}{A \cup \setprn{x}} = \app{\rho}{A} + 1}$，
+        すなわち $\app{\sigma}{A} \in \Flatof{M}$．\qed
+      }
+      \corpar[cor:flatness-and-fixed-by-closure]{平坦性と閉包演算による不動性の一致}{
+        マトロイド $M = \seqprn{S, \Indset}$ と $M$ の閉包演算子 $\sigma$ に対し，
+        \begin{align*}
+          \forallsub{A}{S}{\lflimpleqv{A \in \Flatof{M}}{A = \app{\sigma}{A}}}
+        \end{align*}
+        が成り立つ．
+      }
+      \proof{}{
+        $A \subseteq S$ とする．$A \in \Flatof{M}$ とすると，補題\ref{lem:flatness-and-dependence}より
+        任意の $x \in S$ に対して $x \in A$ と $x \dependson A$ が同値であるから，
+          $\app{\sigma}{A} = \setprnsep{x \in S}{x \dependson A} = \setprnsep{x \in S}{x \in A} = A$
+        となる．
+        逆に $\app{\sigma}{A} = A$ とすると，
+        補題\ref{lem:flatness-of-closure}：閉包の平坦性より $\app{\sigma}{A} \in \Flatof{M}$ であり，
+        したがって $A \in \Flatof{M}$ である．\qed
+      }
+      \lempar{}{
+        マトロイド $M = \seqprn{S, \Indset; \Base, \rho, \sigma, \Circuit}$ に対し，
+        \begin{align*}
+          \forallin{B}{\Base}{\forallin{x}{S}{x \dependson B}}
+        \end{align*}
+        が成り立つ．
+      }
+      \proof{}{
+        $B \in \Base$，$x \in S$ とする．
+        \begin{itemize}
+        \item $x \in B$ のとき，自明である．
+        \item $x \not\in B$ のとき，
+          今仮に $\app{\rho}{B \cup \paren{x}} \neq \app{\rho}{B}$ とすると，
+          \eqref{axiom:R2}より $\app{\rho}{B} \leq \app{\rho}{B \cup \paren{x}} \leq \app{\rho}{B} + 1$ であるから
+          $\app{\rho}{B \cup \setprn{x}} = \app{\rho}{B} + 1$ が成り立つ．
+          ここで $B \in \Indset$ と補題\ref{lem:independence-and-full-rank}より $\app{\rho}{B} = \card{B}$
+          であるから
+          \begin{align*}
+            \app{\rho}{B \cup \setprn{x}}
+              &= \app{\rho}{B} + 1
+            \\&= \card{B} + 1
+              = \card{B \cup \setprn{x}}
+          \end{align*}
+          より $\app{\rho}{B \cup \setprn{x}} = \card{B \cup \setprn{x}}$ が成り立ち，
+          再び補題\ref{lem:independence-and-full-rank}より $B \cup \setprn{x} \in \Indset$ であるが，
+          これは $B$ の極大性に反するので矛盾．
+          したがって $\app{\rho}{B \cup \paren{x}} = \app{\rho}{B}$ であり，$x \dependson B$．
+        \end{itemize}
+        以上より，任意の基 $B \in \Base$ と $x \in S$ に対して $x \dependson B$ が成り立つ．\qed
+      }
+      \lempar[lem:augment-elements-dependence]{}{
+        マトロイド $M = \seqprn{S, \Indset}$ に対し，
+        \begin{align*}
+          \forallsub{X|Y}{S}{\forallin{z}{S}{\lflimpl{\lfland{x \dependson X}{X \subseteq Y}}{x \dependson Y}}}
+        \end{align*}
+        が成り立つ．
+      }
+      \proof{}{
+        $M$ の階数函数を $\rho$ とおき，$X \subseteq Y$ なる $X, Y \subseteq S$ と $z \in S$ を任意にとる．
+        \begin{itemize}
+        \item $z \in Y$ のとき，自明である．
+        \item $z \not\in Y$ のとき，$z \not\in X$ であり，
+          また $z \dependson X$ より $\app{\rho}{X \cup \setprn{z}} = \app{\rho}{X}$ であるから，
+          \eqref{axiom:R3'}より
+          \begin{align*}
+            \app{\rho}{X} + \app{\rho}{Y}
+              &= \app{\rho}{X \cup \setprn{z}} + \app{\rho}{Y}
+            \\&\geq \app{\rho}{Y \cap \paren{X \cup \setprn{z}}} + \app{\rho}{Y \cup \paren{X \cup \setprn{z}}}
+            \\&= \app{\rho}{X} + \app{\rho}{Y \cup \setprn{z}}
+          \end{align*}
+          が成り立ち，すなわち $\app{\rho}{Y} \geq \app{\rho}{Y \cup \setprn{z}}$ である．
+          一方\eqref{axiom:R2'}より $\app{\rho}{Y} \leq \app{\rho}{Y \cup \setprn{z}}$ であるから，結局
+          $\app{\rho}{Y} = \app{\rho}{Y \cup \setprn{z}}$ であり，すなわち $z \dependson Y$．
+        \end{itemize}
+        以上より示された．\qed
+      }
+      \lempar[lem:monotony-of-closure]{閉包演算子の単調性}{
+        マトロイド $M = \seqprn{S, \Indset}$ と $M$ の閉包演算子 $\sigma$ に対して
+        \begin{align*}
+          &\forallsub{A|B}{S}{\lflimpl{A \subseteq B}{\app{\sigma}{A} \subseteq \app{\sigma}{B}}}
+        \end{align*}
+        が成り立つ．
+      }
+      \proof{}{
+        $A, B \subseteq S$ が $A \subseteq B$ を満たすとする．
+        このとき $x \in \app{\sigma}{A}$ を任意にとると，$x \dependson A$ であるから
+        補題\ref{lem:augment-elements-dependence}より $x \dependson B$ である．
+        すなわち $x \in \app{\sigma}{B}$ が成り立つ．ゆえに $\app{\sigma}{A} \subseteq \app{\sigma}{B}$ である．\qed
+      }
+      \lempar[lem:MIS-saves-closure]{}{
+        マトロイド $M = \seqprn{S, \Indset; \Base, \rho, \sigma, \Circuit}$ に対して
+        \begin{align*}
+          &\forallsub{A}{S}{\forallsub{X}{A}{
+            \lflimpl{\lfland{\card{X} = \app{\rho}{A}}{X \in \Indset}}{\app{\sigma}{X} = \app{\sigma}{A}}
+          }}
+        \end{align*}
+        が成り立つ．すなわち，部分集合のうちで極大な独立集合の閉包は，もとの集合の閉包と一致する．
+      }
+      \proof{}{
+        背理法による．
+        $A \subseteq S$ に対し，$X \subseteq A$ が $\card{X} = \app{\rho}{A}$ かつ $X \in \Indset$ を満たすとする．
+        補題\ref{lem:independence-and-full-rank}より $\card{X} = \app{\rho}{X}$ である．
+        いま仮に $\app{\sigma}{X} \neq \app{\sigma}{A}$ が成り立つとすると，
+        $X \subseteq A$ と補題\ref{lem:monotony-of-closure}より $\app{\sigma}{X} \subseteq \app{\sigma}{A}$ より，
+        $\app{\sigma}{X} \subsetneq \app{\sigma}{A}$ である．
+        このとき $\app{\sigma}{A} \setmns \app{\sigma}{X} \neq \varnothing$ より
+        $y \in \app{\sigma}{A} \setmns \app{\sigma}{X}$ がとれる．
+        この $y$ は $y \in \app{\sigma}{A}$ より $y \dependson A$ を満たし，
+        従属性の定義より $\app{\rho}{A \cup \setprn{y}} = \app{\rho}{A}$ が成り立つ．
+        同様に $y \not\in \app{\sigma}{X}$ より $\app{\rho}{X \cup \setprn{y}} \neq \app{\rho}{X}$ であり，
+        階数公理の\eqref{axiom:R2}より結局 $\app{\rho}{X \cup \setprn{y}} = \app{\rho}{X} + 1$．
+        以上より
+        \begin{align*}
+          \app{\rho}{X \cup \setprn{y}}
+            &= \app{\rho}{X} + 1
+          \\&= \card{X} + 1
+          \\&= \app{\rho}{A} + 1
+          \\&= \app{\rho}{A \cup \setprn{y}} + 1 > \app{\rho}{A \cup \setprn{y}}
+        \end{align*}
+        であり $\app{\rho}{X \cup \setprn{y}} > \app{\rho}{A \cup \setprn{y}}$ が成り立つが，
+        これは $X \cup \setprn{y} \subseteq A \cup \setprn{y}$ と補題\ref{lem:monotony-of-rank}：階数函数の単調性から導かれる
+        $\app{\rho}{X \cup \setprn{y}} \leq \app{\rho}{A \cup \setprn{y}}$ と矛盾する．
+        したがって $\app{\sigma}{X} = \app{\sigma}{A}$ が成り立つ．\qed
+      }
+      \lempar[lem:rank-eq-implies-closure-eq]{部分集合との階数の一致による閉包の一致}{
+        マトロイド $M = \seqprn{S, \Indset; \Base, \rho, \sigma, \Circuit}$ に対し，
+        \begin{align*}
+          &\forallsub{A}{S}{\forallsub{X}{A}{
+            \lflimpl{\app{\rho}{X} = \app{\rho}{A}}{\app{\sigma}{X} = \app{\sigma}{A}}
+          }}
+        \end{align*}
+        が成り立つ．
+      }
+      \proof{}{
+        $A \subseteq S$ とし，$X \subseteq A$ が $\app{\rho}{X} = \app{\rho}{A}$ を満たすとする．
+        $\rho$ の定義より $\card{Y} = \app{\rho}{X}$ かつ $Y \subseteq X$ なる $Y \in \Indset$ が存在する．
+        この $Y$ は $\app{\rho}{X} = \app{\rho}{A}$ より $\card{Y} = \app{\rho}{A}$ も満たす．
+        したがって補題\ref{lem:MIS-saves-closure}より
+        $\app{\sigma}{Y} = \app{\sigma}{X}$ かつ $\app{\sigma}{Y} = \app{\sigma}{A}$ が成り立ち，
+        $\app{\sigma}{X} = \app{\sigma}{A}$ である．\qed
+      }
+      \lempar[lem:closure-saves-rank]{閉包演算による階数の保存}{
+        マトロイド $M = \seqprn{S, \Indset; \Base, \rho, \sigma, \Circuit}$ に対し，
+        \begin{align*}
+          &\forallsub{A}{S}{\app{\rho}{\app{\sigma}{A}} = \app{\rho}{A}}
+        \end{align*}
+        が成り立つ．
+      }
+      \proof{}{
+        背理法による．$A \subseteq S$ とする．
+        いま仮に $\app{\rho}{\app{\sigma}{A}} \neq \app{\rho}{A}$ が成り立つとすると，
+        補題\ref{lem:augment-of-closure}：$A \subseteq \app{\sigma}{A}$ と
+        補題\ref{lem:monotony-of-rank}：階数函数の単調性より
+        $\app{\rho}{\app{\sigma}{A}} \geq \app{\rho}{A}$ であるから，
+        結局 $\app{\rho}{\app{\sigma}{A}} > \app{\rho}{A}$ である．$\rho$ の定義より，
+        $\card{X} = \app{\rho}{\app{\sigma}{A}}$ かつ $X \subseteq \app{\sigma}{A}$ なる $X \in \Indset$ と
+        $\card{Y} = \app{\rho}{A}$ かつ $Y \subseteq A$ なる $Y \in \Indset$ がそれぞれ存在するから，
+        この $X, Y \in \Indset$ は $\card{X} > \card{Y}$ を満たす．
+        このとき，定理\ref{thm:augmentation}：増強定理より，或る $Z \subseteq X \setmns Y$ が存在して
+        $\card{Y \cup Z} = \card{X}$ かつ $Y \cup Z \in \Indset$ が成り立つ．
+        この $Z$ をとると $Z \neq \varnothing$ であるから，$z \in Z$ がとれる．
+        $Y \cup \setprn{z} \subseteq Y \cup Z$ と\eqref{axiom:I2}より
+        $Y \cup \setprn{z} \in \Indset$ であり，
+          $\app{\rho}{Y \cup \setprn{z}} = \card{Y \cup \setprn{z}} = \card{Y} + 1 \neq \card{Y}$
+        より $z \not\in \app{\sigma}{Y}$ が成り立つ．
+        補題\ref{lem:MIS-saves-closure}より $\app{\sigma}{Y} = \app{\sigma}{A}$ であり，
+        $z \not\in \app{\sigma}{A}$ であるが，
+        これは $z \in Z$ かつ $Z \subseteq \app{\sigma}{A}$ より $z \in \app{\sigma}{A}$ であることに矛盾．
+        ゆえに $\app{\rho}{\app{\sigma}{A}} = \app{\rho}{A}$ が成り立つ．\qed
+        % ----
+        \begin{center}
+          \input{img/ven4.tex}
+        \end{center}
+        % ----
+      }
+      \corpar[cor:idempotence-of-closure]{閉包演算子の合成に関する冪等律}{
+        マトロイド $M = \seqprn{S, \Indset}$ と $M$ の閉包演算子 $\sigma$ に対し，
+        \begin{align*}
+          &\forallsub{A}{S}{\app{\sigma}{\app{\sigma}{A}} = \app{\sigma}{A}}
+        \end{align*}
+        が成り立つ．すなわち，$\compnd{\sigma|\sigma} = \sigma$ である．
+      }
+      \proof{}{
+        補題\ref{lem:closure-saves-rank}と補題\ref{lem:rank-eq-implies-closure-eq}より明らかである．\qed
+      }
+      \plainpar{}{
+        次の補題は閉包公理の[$\backlimpl$]を示すための準備である．$\sigma$ は閉包演算子ではなく単なる
+        \eqref{axiom:S1}，\eqref{axiom:S2}，\eqref{axiom:S3}，\eqref{axiom:S4}を満たす写像であることに注意．
+      }
+      \lempar[lem:axiom-Ss]{}{
+        有限集合 $S$ と\eqref{axiom:S1}，\eqref{axiom:S2}，\eqref{axiom:S3}，\eqref{axiom:S4}を満たす
+        $\funcdoms{\sigma}{\Power{S}}{\Power{S}}$ に対して
+        \begin{align*}
+          \Indset &\defeq \setprnsep{A \subseteq S}{\forallin{x}{A}{x \not\in \app{\sigma}{A \setmns \setprn{x}}}}
+        \end{align*}
+        で $\Indset$ を定めると，
+        \begin{align*}
+          \forallin{I}{\Indset}{\forallsub{A}{S}{\lflimpl{\card{A} < \card{I}}{I \not\subseteq \app{\sigma}{A}}}}
+        \end{align*}
+        が成り立つ．
+      }
+      \proof{}{
+        $I \in \Indset$，$A \subseteq S$ が $\card{A} < \card{I}$ を満たすとする．
+        $\card{A \setmns I}$ に関する帰納法による．
+        \begin{itemize}
+        \item $\card{A \setmns I} = 0$ のとき，
+          $A \subseteq I$ であるから，$\card{A} < \card{I}$ より $A \subsetneq I$ が成り立ち，$x \in I \setmns A$ がとれる．
+          この $x$ は $A \subseteq I \setmns \setprn{x}$ を満たすから\eqref{axiom:S2}より
+            $\app{\sigma}{A} \subseteq \app{\sigma}{I \setmns \setprn{x}}$
+          であり，また $x \in I$，$I \in \Indset$ と $\Indset$ の定義より $x \not\in \app{\sigma}{I \setmns \setprn{x}}$
+          であるから $x \not\in \app{\sigma}{A}$ が成り立つ．したがって $x \in I \setmns \app{\sigma}{A}$ であり，
+          $I \not\subseteq \app{\sigma}{A}$ が成り立つ．
+        \item $\card{A \setmns I} \geq 1$ のとき，
+          $y \in A \setmns I$ がとれて，
+          $\card{\paren{A \setmns \setprn{y}} \setmns I} < \card{A \setmns I}$ から帰納法の仮定より
+          $I \not\subseteq \app{\sigma}{A \setmns \setprn{y}}$，
+          すなわち $x \in I \setmns \app{\sigma}{A \setmns \setprn{y}}$ がとれる．
+          \begin{itemize}
+          \item $x \not\in \app{\sigma}{A}$ のとき，
+            $x \in I \setmns \app{\sigma}{A}$ より $I \not\subseteq \app{\sigma}{A}$．
+          \item $x \in \app{\sigma}{A}$ のとき，
+              $x \not\in \app{\sigma}{A \setmns \setprn{y}}$
+            かつ
+              $x \in \app{\sigma}{A} = \app{\sigma}{\paren{A \setmns \setprn{y}} \cup \setprn{y}}$
+            から\eqref{axiom:S4}より $y \in \app{\sigma}{\paren{A \setmns \setprn{y}} \cup \setprn{x}}$．
+            \eqref{axiom:S1}および\eqref{axiom:S2}より
+              $A \setmns \setprn{y} \subseteq \app{\sigma}{\paren{A \setmns \setprn{y}} \cup \setprn{x}}$
+            であるから，結局
+              $A \subseteq \app{\sigma}{\paren{A \setmns \setprn{y}} \cup \setprn{x}}$
+            が成り立つ．ここでさらに\eqref{axiom:S2}と\eqref{axiom:S3}より
+              $\app{\sigma}{A} \subseteq \app{\sigma}{\paren{A \setmns \setprn{y}} \cup \setprn{x}}$
+            が成り立つ．また，
+              $\card{\paren{\paren{A \setmns \setprn{y}} \cup \setprn{x}} \setmns I} < \card{A \setmns I}$
+            から帰納法の仮定より $I \not\subseteq \app{\sigma}{\paren{A \setmns \setprn{y}} \cup \setprn{x}}$
+            が成り立ち，したがって $I \not\subseteq \app{\sigma}{A}$ である．
+          \end{itemize}
+          よっていずれの場合も $I \not\subseteq \app{\sigma}{A}$ が成り立つ．
+        \end{itemize}
+        以上より示された．\qed
+      }
+      \plainpar{}{
+        これで準備が整ったので，閉包公理を示すことにする．
+      }
+      \thmpar*{再掲：閉包公理}{
+        $S$ を有限集合とする．
+        $\funcdoms{\sigma}{\Power{S}}{\Power{S}}$ が或る $S$ 上のマトロイドの閉包演算子であるための必要十分条件は
+        \begin{align}
+        \tag{S1}&
+          \forallsub{X}{S}{X \subseteq \app{\sigma}{X}}
+        \\
+        \tag{S2}&
+          \forallsub{X|Y}{S}{\lflimpl{X \subseteq Y}{\app{\sigma}{X} \subseteq \app{\sigma}{Y}}}
+        \\
+        \tag{S3}&
+          \forallsub{X}{S}{\app{\sigma}{X} = \app{\sigma}{\app{\sigma}{X}}}
+        \\
+        \tag{S4}&
+          \forallsub{X}{S}{\forallin{x|y}{S}{
+            \lflimpl{
+              \lfland{y \not\in \app{\sigma}{X}}{y \in \app{\sigma}{X \cup \setprn{x}}}
+            }{
+              x \in \app{\sigma}{X \cup \setprn{y}}
+            }
+          }}
+        \end{align}
+        である．
+      }
+      \proof{}{
+        \subproof{$\limpl$}{
+          マトロイド $M = \seqprn{S, \Indset}$ の閉包演算子 $\sigma$ が
+          \eqref{axiom:S1}，\eqref{axiom:S2}，\eqref{axiom:S3}，\eqref{axiom:S4}をすべて満たすことを示す．
+          \eqref{axiom:S1}は補題\ref{lem:augment-of-closure}：閉包演算子の増大性で，
+          \eqref{axiom:S2}は補題\ref{lem:monotony-of-closure}：閉包演算子の単調性で，
+          \eqref{axiom:S3}は系\ref{cor:idempotence-of-closure}：閉包演算子の冪等律でそれぞれ既に示しているから，
+          以降では\eqref{axiom:S4}を背理法により示す．
+        \decosep
+          $y \not\in \app{\sigma}{X}$ かつ $y \in \app{\sigma}{X \cup \setprn{x}}$ なる
+          $X \subseteq S$ と $x, y \in S$ が，仮に $x \not\in \app{\sigma}{X \cup \setprn{y}}$ を満たすとする．
+          $y \not\in \app{\sigma}{X}$ および\eqref{axiom:R2}より
+          \begin{align*}
+            \app{\rho}{X \cup \setprn{y}} &= \app{\rho}{X} + 1
+          \end{align*}
+          が，$y \in \app{\sigma}{X \cup \setprn{x}}$ より
+          \begin{align*}
+            \app{\rho}{X \cup \setprn{x} \cup \setprn{y}} &= \app{\rho}{X \cup \setprn{x}}
+          \end{align*}
+          が，$x \not\in \app{\sigma}{X \cup \setprn{y}}$ および\eqref{axiom:R2}より
+          \begin{align*}
+            \app{\rho}{X \cup \setprn{x} \cup \setprn{y}} &= \app{\rho}{X \cup \setprn{y}} + 1
+          \end{align*}
+          がそれぞれ成り立つ．以上より
+          \begin{align*}
+            \app{\rho}{X \cup \setprn{x}}
+              &= \app{\rho}{X \cup \setprn{x} \cup \setprn{y}}
+            \\&= \app{\rho}{X \cup \setprn{y}} + 1
+            \\&= \app{\rho}{X} + 2
+          \end{align*}
+          であり $\app{\rho}{X \cup \setprn{x}} = \app{\rho}{X} + 2$ が成り立つが，
+          これは\eqref{axiom:R2}に矛盾．ゆえに $x \in \app{\sigma}{X \cup \setprn{y}}$ である．\qed
+        }
+        \subproof{$\backlimpl$}{
+          \eqref{axiom:S1}，\eqref{axiom:S2}，\eqref{axiom:S3}，\eqref{axiom:S4}をすべて満たす
+          有限集合 $S$ と $\funcdoms{\sigma}{\Power{S}}{\Power{S}}$ に対して
+          \begin{align*}
+            \Indset &\defeq \setprnsep{A \subseteq S}{\forallin{x}{A}{x \not\in \app{\sigma}{A \setmns \setprn{x}}}}
+          \end{align*}
+          で定めた $\Indset$ が\eqref{axiom:I1}，\eqref{axiom:I2}，\eqref{axiom:I3}を満たすことを示す．
+        \decosep
+          まず $\Indset$ の定義より $\varnothing \in \Indset$ であり，\eqref{axiom:I1}が成り立つ．
+        \decosep
+          次に\eqref{axiom:I2}を背理法により示す．
+          今仮に或る $X \in \Indset$ と $Y \subseteq X$ が $Y \not\in \Indset$ を満たすとすると，
+          $\Indset$ の定義より或る $y \in Y$ が存在して $y \in \app{\sigma}{Y \setmns \setprn{y}}$ である．
+          $Y \setmns \setprn{y} \subseteq X \setmns \setprn{y}$ と\eqref{axiom:S2}より
+          $\app{\sigma}{Y \setmns \setprn{y}} \subseteq \app{\sigma}{X \setmns \setprn{y}}$ であり，
+          したがって $y \in \app{\sigma}{X \setmns \setprn{y}}$ が成り立つが，これは $X \in \Indset$ に矛盾．
+          ゆえに任意の $X \in \Indset$ と $Y \subseteq X$ に対して $Y \in \Indset$ であり，\eqref{axiom:I2}が成り立つ．
+        \decosep
+          最後に\eqref{axiom:I3}を示す．
+          $X, Y \in \Indset$ が $\card{X} = \card{Y} + 1$ を満たすとすると，補題\ref{lem:axiom-Ss}より
+          $X \not\subseteq \app{\sigma}{Y}$，すなわち $x \in X \setmns \app{\sigma}{Y}$ がとれる．この $x$ は
+          $x \not\in \app{\sigma}{Y} = \app{\sigma}{\paren{Y \cup \setprn{x}} \setmns \setprn{x}}$ を満たし，
+          また $Y \in \Indset$ であるから，
+          任意に $z \in Y \cup \setprn{x}$ をとると $z \not\in \app{\sigma}{Y \setmns \setprn{z}}$ が成り立つ．
+          このとき，\eqref{axiom:S4}の対偶
+          \begin{align*}
+            \forallsub{X}{S}{\forallin{y|z}{S}{\lflimpl{x \not\in \app{\sigma}{X \cup \setprn{y}}}{
+              \lflor{y \in \app{\sigma}{X}}{y \not\in \app{\sigma}{X \cup \setprn{x}}}
+            }}}
+          \end{align*}
+          を用いると $x \not\in \app{\sigma}{Y} = \app{\sigma}{\paren{Y \setmns \setprn{z}} \cup \setprn{z}}$
+          より
+            $z \in \app{\sigma}{Y \setmns \setprn{z}}$
+          または
+            $z \not\in \app{\sigma}{\paren{Y \setmns \setprn{z}} \cup \setprn{x}}$
+          が成り立つが，前者は既に掲げた $z \not\in \app{\sigma}{Y \setmns \setprn{z}}$ に反するから，
+            $z \not\in \app{\sigma}{\paren{Y \setmns \setprn{z}} \cup \setprn{x}}$
+          が成り立つことになる．
+            $\paren{Y \setmns \setprn{x}} \cup \setprn{z} \subseteq \paren{Y \setmns \setprn{z}} \cup \setprn{x}$
+          と\eqref{axiom:S2}より
+            $\app{\sigma}{\paren{Y \setmns \setprn{x}} \cup \setprn{z}}
+              \subseteq \app{\sigma}{\paren{Y \setmns \setprn{z}} \cup \setprn{x}}$
+          が成り立ち，したがって $z \not\in \app{\sigma}{\paren{Y \setmns \setprn{x}} \cup \setprn{z}}$．
+          $z \in Y \cup \setprn{x}$ は任意であったので，
+          \begin{align*}
+            \forallin{z}{Y \cup \setprn{x}}{z \not\in \app{\sigma}{\paren{Y \setmns \setprn{x}} \cup \setprn{z}}}
+          \end{align*}
+          が成り立ち，したがって $Y \cup \setprn{x} \in \Indset$ である．
+          ゆえに，$\card{X} = \card{Y} + 1$ なる $X, Y \in \Indset$ に対し，或る $x \in Y \setmns X$ が存在して
+          $Y \cup \setprn{x} \in \Indset$ を満たし，\eqref{axiom:I3}が成り立つ．
+        \decosep
+          以上より $\seqprn{S, \Indset}$ はマトロイドである．\qed
+%        \decosep
+%          最後の
+%          \begin{align*}
+%          \tag{I3\textprime}&
+%            \forallsub{A}{S}{
+%              \forallin{Y_{1}|Y_{2}}{\maxl \setprnsep{Y \subseteq A}{Y \in \Indset}}{\card{Y_{1}} = \card{Y_{2}}}
+%            }
+%          \end{align*}
+%          だが，段階を追って示していく．まず
+%          \begin{align*}
+%          \tag{$\ast$}\label{thm:axiom-of-closure|1}&
+%            \forallsub{A}{S}{\forallin{X}{\maxl \setprnsep{Y \subseteq A}{Y \in \Indset}}{
+%              \app{\sigma}{X} = \app{\sigma}{A}}
+%            }
+%          \end{align*}
+%          を示す．$A \subseteq S$，$X \in \maxl \setprnsep{Y \subseteq A}{Y \in \Indset}$ とする．
+%          いま仮に $A \not\subseteq \app{\sigma}{X}$ であるとすると，
+%          $A \setmns \app{\sigma}{X} \neq \varnothing$ より $a \in A \setmns \app{\sigma}{X}$ がとれる．
+%          すなわち $a \not\in \app{\sigma}{A}$ である．
+%          ここで仮に $X \cup \setprn{a} \not\in \Indset$ であるとすると，$\Indset$ の定義より
+%          或る $x \in X \cup \setprn{a}$ が存在して
+%          \begin{align*}
+%            x &\in \app{\sigma}{\paren{X \cup \setprn{a}} \setmns \setprn{x}}
+%              = \app{\sigma}{\paren{X \setmns \setprn{x}} \cup \setprn{a}}
+%          \end{align*}
+%          が成り立つ．
+%          また $X \in \Indset$ より $x \not\in \app{\sigma}{X \setmns x}$ であるから，\eqref{axiom:S4}より
+%          \begin{align*}
+%            a &\in \app{\sigma}{\paren{X \setmns \setprn{x}} \cup \setprn{x}}
+%              = \app{\sigma}{X}
+%          \end{align*}
+%          が成り立つが，これは最初の $a \not\in \app{\sigma}{A}$ に矛盾．
+%          したがって $X \cup \setprn{a} \in \Indset$ であるが，$X \cup \setprn{a} \subseteq A$ より，
+%          $X$ の極大性に反しさらに矛盾．ゆえに $A \subseteq \app{\sigma}{X}$ である．
+%          $X \subseteq A$ と\eqref{axiom:S2}より
+%          \begin{align*}
+%            X &\subseteq A \subseteq \app{\sigma}{X}
+%          \end{align*}
+%          であり，さらに\eqref{axiom:S2}より
+%          \begin{align*}
+%            \app{\sigma}{X} &\subseteq \app{\sigma}{\app{\sigma}{A}} \subseteq \app{\sigma}{\app{\sigma}{X}}
+%          \end{align*}
+%          が成り立つが，\eqref{axiom:S3}より
+%          \begin{align*}
+%            \app{\sigma}{X} &\subseteq \app{\sigma}{A} \subseteq \app{\sigma}{X}
+%          \end{align*}
+%          であり，結局 $\app{\sigma}{X} = \app{\sigma}{A}$ が成り立つ．
+%        \decosep
+%          続いて
+%          \begin{align*}
+%          \tag{$\ast\ast$}\label{thm:axiom-of-closure|2}&
+%            \forallsub{X|Y}{S}{
+%              \lflimpl{\lfland{X \in \Indset}{Y \subsetneq X}}{\app{\sigma}{Y} \subsetneq \app{\sigma}{X}}
+%            }
+%          \end{align*}
+%          を示す．$X \in \Indset$ かつ $Y \subsetneq X$ なる $X, Y \subseteq S$ に対し，
+%          $X \setmns Y \neq \varnothing$ より $x \in X \setmns Y$ がとれる．
+%          $x \in X$ と $X \in \Indset$ より $x \not\in \app{\sigma}{X \setmns \setprn{x}}$ である．
+%          また $Y \subseteq X \setmns \setprn{x}$ と\eqref{axiom:S2}より
+%          $\app{\sigma}{Y} \subseteq \app{\sigma}{X \setmns \setprn{x}}$
+%          であり，したがって $x \not\in \app{\sigma}{Y}$．
+%          一方 $x \in X$ および\eqref{axiom:S1}：$X \subseteq \app{\sigma}{X}$ より $x \in \app{\sigma}{X}$ であるから，
+%          結局 $x \in \app{\sigma}{X} \setmns \app{\sigma}{Y}$．
+%          $Y \subseteq X$ と\eqref{axiom:S2}より $\app{\sigma}{Y} \subseteq \app{\sigma}{X}$ であり，
+%          結局 $\app{\sigma}{Y} \subsetneq \app{\sigma}{X}$．
+%        \decosep
+%          さて，\eqref{axiom:I3'}を背理法により示す．$A \subseteq S$ とし，
+%          仮に或る $X, Y \in \maxl \setprnsep{P \subseteq S}{P \in \Indset}$ が
+%          $\card{X} < \card{Y}$ を満たすとする．
+%          このような $X$ と $Y$ のうち，$\card{X \cap Y}$ が極大であるものを選ぶ．
+%          $\card{X} < \card{Y}$ より $X \not\subseteq Y$ であるから，$y \in Y \setmns X$ がとれる．
+%          このとき $Y \setmns \setprn{y} \subsetneq A$ より
+%          \remains
+        }
+      }
+      \thmpar{閉包の平坦集合としての最小性}{
+        マトロイド $M = \seqprn{S, \Indset}$，$M$ の閉包演算子 $\sigma$，$A \subseteq S$ に対して，
+        $\app{\sigma}{A}$ は $A$ を部分集合とする最小の平坦集合である．すなわち
+        $\famF_{A} \defeq \setprnsep{F \in \Flatof{M}}{A \subseteq F}$
+        として $\minl \famF_{A} = \setprn{\app{\sigma}{A}}$ である．
+      }
+      \proof{}{
+        まず $\app{\sigma}{A} \in \famF_{A}$ を示す．
+        補題\ref{lem:augment-of-closure}：閉包演算子の増大性より $A \subseteq \app{\sigma}{A}$ が成り立つ．
+        また補題\ref{lem:flatness-of-closure}より $\app{\sigma}{A} \in \Flatof{M}$ が成り立つ．
+        ゆえに $\app{\sigma}{A} \in \famF_{A}$．
+      \decosep
+        次に任意の $X \in \famF_{A}$ に対して $\app{\sigma}{A} \subseteq X$ が成り立つことを示す．
+        $X \in \famF_{A}$ をとると $A \subseteq X$ かつ $X \in \Flatof{M}$ である．
+        ここで $x \in \app{\sigma}{A}$ とすると $x \dependson A$ であり，
+        $x \dependson A$ および $A \subseteq X$ から補題\ref{lem:augment-elements-dependence}より $x \dependson X$．
+        そして $x \dependson X$ と補題\ref{lem:flatness-and-dependence}より $x \in X$ が成り立つ．
+        したがって $\app{\sigma}{A} \subseteq X$ である．
+      \decosep
+        以上より $\app{\sigma}{A}$ は $\famF_{A}$ の包含関係に関する最小元であり，
+        $\minl \famF_{A} = \setprn{\app{\sigma}{A}}$ である．\qed
+      }
+      \lempar[lem:intersection-saves-flatness]{平坦集合同士の共通部分の平坦性}{
+        マトロイド $M = \seqprn{S, \Indset}$ に対し，
+        \begin{align*}
+          \forallin{X|Y}{\Flatof{M}}{X \cap Y \in \Flatof{M}}
+        \end{align*}
+        が成り立つ．さらに，一般に
+        \begin{align*}
+          \forallsub{\famA}{\Flatof{M}}{\bigcap \famA \in \Flatof{M}}
+        \end{align*}
+        が成り立つ．
+      }
+      \proof{}{
+        $X, Y \in \Flatof{M}$ とする．平坦性より $\app{\sigma}{X} = X$ および $\app{\sigma}{Y} = Y$ である．
+        $X \cap Y \subseteq X$ と\eqref{axiom:S2}より $\app{\sigma}{X \cap Y} \subseteq \app{\sigma}{X}$，
+        同様に $\app{\sigma}{X \cap Y} \subseteq \app{\sigma}{Y}$ であるから，
+        $\app{\sigma}{X \cap Y} \subseteq \app{\sigma}{X} \cap \app{\sigma}{Y}$ が成り立つ．
+        したがって\eqref{axiom:S1}より
+        \begin{align*}
+          X \cap Y
+            &\subseteq \app{\sigma}{X \cap Y}
+          \\&\subseteq \app{\sigma}{X} \cap \app{\sigma}{Y} = X \cap Y
+        \end{align*}
+        であり，$X \cap Y = \app{\sigma}{X \cap Y}$ が成り立つ．一般の場合もほぼ同様．\qed
+      }
+      \lempar{共通部分としての閉包}{
+        マトロイド $M = \seqprn{S, \Indset}$ に対し，
+        \begin{align*}
+          \forallsub{A}{S}{\app{\sigma}{A} = \bigcap \setprnsep{F \in \Flatof{M}}{A \subseteq F}}
+        \end{align*}
+        が成り立つ．すなわち，任意の $A \subseteq S$ に対して
+        $\app{\sigma}{A}$ は $A$ を包むすべての平坦集合の共通部分である．
+      }
+      \proof{}{
+        $A \subseteq S$ とし，$\famF_{A} \defeq \setprnsep{F \in \Flatof{M}}{A \subseteq F}$ とおく．
+        \eqref{axiom:S1}：$A \subseteq \app{\sigma}{A}$ および補題\ref{lem:flatness-of-closure}：閉包の平坦性より
+        $\app{\sigma}{A} \in \famF_{A}$ であり，$\bigcap \famF_{A} \subseteq \app{\sigma}{A}$ は明らか．
+      \decosep
+        $x \in \app{\sigma}{A}$ とすると $x \dependson A$ および $A \subseteq \bigcap \famF_{A}$ から
+        補題\ref{lem:augment-elements-dependence}より $x \dependson \bigcap \famF_{A}$ すなわち
+        $x \in \app{\sigma}{\bigcap \famF_{A}}$ であるが，
+        補題\ref{lem:intersection-saves-flatness}より $\bigcap \famF_{A} \in \Flatof{M}$ であり，さらに
+        系\ref{cor:flatness-and-fixed-by-closure}より $\app{\famF}{\bigcap \famF_{A}} = \bigcap \famF_{A}$ であるから
+        結局 $x \in \bigcap \famF_{A}$ である．したがって $\app{\sigma}{A} \subseteq \bigcap \famF_{A}$．
+      \decosep
+        以上より，$\app{\sigma}{A} = \bigcap \famF_{A}$ が成り立つ．\qed
+      }
+    % ---- ----
+    \subsection{周に関する性質}
+      \lempar[lem:circuit-fundamental]{周の簡単な性質}{
+        マトロイド $M = \seqprn{S, \Indset; \Base, \rho, \sigma, \Circuit}$ に対し，以下がそれぞれ成り立つ．
+        \begin{thmenum}
+        \thmenumitem\label{lem:circuit-fundamental|1}
+          従属集合は或る周を包む：
+            $\forallin{A}{\Power{S} \setmns \Indset}{\existsin{C}{\Circuit}{C \subseteq A}}$
+        \thmenumitem\label{lem:circuit-fundamental|2}
+          周の真部分集合はすべて独立：
+            $\forallin{C}{\Circuit}{\forallin{x}{C}{C \setmns \setprn{x} \in \Indset}}$
+        \thmenumitem\label{lem:circuit-fundamental|3}
+          周の階数は大きさより $1$ 小さい：
+            $\forallin{C}{\Circuit}{\app{\rho}{C} = \card{C} - 1}$
+        \thmenumitem\label{lem:circuit-fundamental|4}
+          $\forallin{C}{\Circuit}{\card{C} \leq \app{\rho}{S} + 1}$
+        \thmenumitem\label{lem:circuit-fundamental|5}
+          周が存在しないことと基が $S$ のみであることは同値：
+            $\lflimpleqv{\Circuit = \varnothing}{\Base = \setprn{S}}$
+        \thmenumitem\label{lem:circuit-fundamental|6}
+          相異なる周の一方が他方を真に包むことはない：
+            $\forallin{C_{1}|C_{2}}{\Circuit}{\lflimpl{C_{1} \subseteq C_{2}}{C_{1} = C_{2}}}$
+        \end{thmenum}
+      }
+      \proof{}{いずれも自明である．\qed}
+      \lempar[lem:C2]{}{
+        マトロイド $M = \seqprn{S, \Indset}$ と $M$ の周族 $\Circuit$ に対し，
+        \begin{align*}
+          \forallin{C_{1}|C_{2}}{\Circuit}{\lflimpl{C_{1} \neq C_{2}}{
+            \forallin{z}{C_{1} \cap C_{2}}{\existsin{C_{3}}{\Circuit}{C_{3} \subseteq \paren{C_{1} \cup C_{2}} \setmns \setprn{z}}}
+          }}
+        \end{align*}
+        が成り立つ．
+      }
+      \proof{}{
+        背理法による．すなわち，或る $C_{1} \neq C_{2}$ なる $C_{1}, C_{2} \in \Circuit$ と
+        或る $z \in C_{1} \cap C_{2}$ に対して，$C_{3} \subseteq \paren{C_{1} \cup C_{2}} \setmns \setprn{z}$ なる
+        $C_{3} \in \Circuit$ が存在しないと仮定する．
+        補題\ref{lem:circuit-fundamental}\ref{lem:circuit-fundamental|1}の対偶より
+        $\paren{C_{1} \cup C_{2}} \setmns \setprn{z} \in \Indset$ であるから，
+        \begin{align*}
+          \app{\rho}{\paren{C_{1} \cup C_{2}} \setmns \setprn{z}}
+            &= \card{\paren{C_{1} \cup C_{2}} \setmns \setprn{z}}
+          \\&= \card{C_{1} \cup C_{2}} - 1
+        \end{align*}
+        が成り立つ．また $C_{1}, C_{2} \in \Circuit$ と
+        補題\ref{lem:circuit-fundamental}\ref{lem:circuit-fundamental|3}より
+        $\app{\rho}{C_{1}} = \card{C_{1}} - 1$ および $\app{\rho}{C_{2}} = \card{C_{2}} - 1$
+        であり，\eqref{axiom:R3'}：劣モジュラ律より
+        \begin{align*}
+          \app{\rho}{C_{1} \cup C_{2}} + \app{\rho}{C_{1} \cap C_{2}}
+            &\leq \app{\rho}{C_{1}} + \app{\rho}{C_{2}}
+          \\&= \card{C_{1}} + \card{C_{2}} - 2
+          \\&= \card{C_{1} \cup C_{2}} + \card{C_{1} \cap C_{2}} - 2
+        \end{align*}
+        が成り立つ．ここで\eqref{axiom:R2'}より
+        $\app{\rho}{C_{1} \cup C_{2}} \geq \app{\rho}{\paren{C_{1} \cup C_{2}} \setmns \setprn{z}} = \card{C_{1} \cup C_{2}} - 1$
+        であるから
+        \begin{align*}
+          \app{\rho}{C_{1} \cap C_{2}}
+            &\leq \card{C_{1} \cup C_{2}} + \card{C_{1} \cap C_{2}} - 2 - \app{\rho}{C_{1} \cup C_{2}}
+          \\&\leq \card{C_{1} \cup C_{2}} + \card{C_{1} \cap C_{2}} - 2 - \paren{\card{C_{1} \cup C_{2}} - 1}
+          \\&= \card{C_{1} \cap C_{2}} - 1
+        \end{align*}
+        より $\app{\rho}{C_{1} \cap C_{2}} < \card{C_{1} \cap C_{2}}$ となるが，
+        $C_{1} \neq C_{2}$ より $C_{1} \cap C_{2} \subsetneq C_{1}$ であり，
+        補題\ref{lem:circuit-fundamental}\ref{lem:circuit-fundamental|2}より $C_{1} \cap C_{2} \in \Indset$，すなわち
+        $\app{\rho}{C_{1} \cap C_{2}} = \card{C_{1} \cap C_{2}}$ が成り立つので矛盾である．
+        ゆえに，任意の $C_{1} \neq C_{2}$ なる $C_{1}, C_{2} \in \Circuit$ と $z \in C_{1} \cap C_{2}$ に対し，
+        $C_{3} \subseteq \paren{C_{1} \cup C_{2}} \setmns \setprn{z}$ なる $C_{3} \in \Circuit$ が存在する．\qed
+      }
+    % ---- ----
+      \lempar[lem:at-most-one-circuit-contained]{}{
+        マトロイド $M = \seqprn{S, \Indset}$ と $M$ の周族 $\Circuit$ に対し，
+        \begin{align*}
+          \forallin{A}{\Indset}{\forallin{x}{S}{\card{\setprnsep{C \in \Circuit}{C \subseteq A \cup \setprn{x}}} \leq 1}}
+        \end{align*}
+        が成り立つ．
+        すなわち，任意の $A \in \Indset$ と $x \in S$ に対して，$A \cup \setprn{x}$ に包まれる周は高々 $1$ つである．
+      }
+      \proof{}{
+        今仮に $A \in \Indset$，$x \in S$ とし，$C_{1} \neq C_{2}$ なる $C_{1}, C_{2} \in \Circuit$ が
+        $C_{1} \in A \cup \setprn{x}$，$C_{2} \in A \cup \setprn{x}$ を満たすとする．
+        このとき $C_{1} \cup C_{2} \in A \cup \setprn{x}$ である．
+        また $x \not\in C_{1}$ と仮定すると $C_{1} \subseteq A$ であり，
+        \eqref{axiom:I2}より $C_{1} \in \Indset$ となって矛盾するので $x \in C_{1}$，同様に $x \in C_{2}$ も成り立つ．
+        したがって $x \in C_{1} \cap C_{2}$ であり，補題\ref{lem:C2}より
+          $C_{3} \subseteq \paren{C_{1} \cup C_{2}} \setmns \setprn{x}$
+        なる $C_{3} \in \Circuit$ が存在する．この $C_{3}$ は $\paren{C_{1} \cup C_{2}} \setmns \setprn{x} \subseteq A$ より
+        $C_{3} \subseteq A$ を満たし，\eqref{axiom:I2}より $C_{3} \in \Indset$ となって矛盾．
+        ゆえに $A \cup \setprn{x}$ に包まれる周は高々 $1$ つである．\qed
+      }
+      \corpar[cor:fundamental-circuit]{}{
+        マトロイド $M = \seqprn{S, \Indset; \Base, \rho, \sigma, \Circuit}$ に対し，
+        \begin{align*}
+          \forallin{B}{\Base}{\forallin{x}{S \setmns B}{\existssolein{C}{\Circuit}{C \subseteq B \cup \setprn{x}}}}
+        \end{align*}
+        が成り立つ．
+        すなわち，任意の基 $B \in \Base$ と $x \in S \setmns B$ に対して $B \cup \setprn{x}$ に包まれる周が一意的に存在する．
+      }
+      \proof{}{
+        $B \in \Base$，$x \in S \setmns B$ に対し，$B \subsetneq B \cup \setprn{x}$ と $B$ の極大性より
+        $B \cup \setprn{x} \in \Indset$ であり，補題\ref{lem:circuit-fundamental}\ref{lem:circuit-fundamental|1}より
+        $C \subseteq B \cup \setprn{x}$ なる $C \in \Circuit$ が存在するが，
+        このような $C$ は補題\ref{lem:at-most-one-circuit-contained}より一意的である．\qed
+      }
+      \defpar{基本周}{
+        マトロイド $M = \seqprn{S, \Indset; \Base, \rho, \sigma, \Circuit}$ に於いて，
+        基 $B \in \Base$ および $x \in S \setmns B$ に対して一意的に存在する
+        $C \subseteq B \cup \setprn{x}$ なる周 $C \in \Circuit$ を，$x$ と $B$ による
+        \newwordjaen{基本周}{fundamental circuit}と呼び，$\FundCircuit{x}{B}$ と書く．
+      }
+      \plainpar{}{
+        ところで，補題\ref{lem:C2}はさらに強い主張にすることができる．
+        それが次の\newwordjaen{強周公理}{strong circuit axiom}である．
+      }
+      \thmpar{強周公理}{
+        マトロイド $M = \seqprn{S, \Indset}$ と $M$ の周族 $\Circuit$ に対し，
+        \begin{multline*}
+          \forallin{C_{1}|C_{2}}{\Circuit}{\lflimpl{C_{1} \neq C_{2}}{\midbreak\forallin{x}{C_{1} \cap C_{2}}{
+            \forallin{y}{C_{1} \setmns C_{2}}{\existsin{C_{0}}{\Circuit}{
+              \lfland{y \in C_{0}}{C_{0} \subseteq \paren{C_{1} \cup C_{2}} \setmns \setprn{x}}
+            }}
+          }}}
+        \end{multline*}
+        が成り立つ．
+      }
+      \proof{}{
+        今仮に或る $C_{1} \neq C_{2}$ なる $C_{1}, C_{2} \in \Circuit$ と
+        $x \in C_{1} \cap C_{2}$，$y \in C_{1} \setmns C_{2}$ が存在して，
+        $y \in C_{3}$ かつ $C_{3} \subseteq \paren{C_{1} \cup C_{2}} \setmns \setprn{x}$ なる $C_{3}$ が存在しないとする．
+        その中でも $C_{1} \cup C_{2}$ が極小となるようなものを選ぶ．
+        このとき，補題\ref{lem:C2}より
+          $y \not\in C_{3}$ かつ $C_{3} \subseteq \paren{C_{1} \cup C_{2}} \setmns \setprn{x}$
+        なる $C_{3} \in \Circuit$ が存在する．この $C_{3}$ は周の極小性より $C_{3} \setmns C_{1} \neq \varnothing$ を満たすから
+        $C_{3} \cap \paren{C_{2} \setmns C_{1}} \neq \varnothing$ を満たし，
+        したがって $z \in C_{3} \cap \paren{C_{2} \setmns C_{1}}$ がとれる．
+      \decosep
+        このとき $z \in C_{2} \cap C_{3}$，$x \in C_{2} \setmns C_{3}$ であり，
+        また $y \in C_{1}$ かつ $y \in C_{2} \cup C_{3}$ より $C_{2} \cup C_{3} \subsetneq C_{1} \cup C_{2}$．
+        $C_{1} \cup C_{2}$ の選び方より，$C_{2} \cup C_{3}$ に対しては或る $C_{4} \in \Circuit$ が存在して
+        $x \in C_{4}$ かつ $C_{4} \subseteq \paren{C_{2} \cup C_{3}} \setmns \setprn{z}$ を満たす．
+      \decosep
+        さらに，$x \in C_{1} \cap C_{4}$，$y \in C_{1} \setmns C_{4}$ であり，
+        また $z \in C_{2}$ かつ $z \not\in C_{1} \cup C_{4}$ より $C_{1} \cup C_{4} \subsetneq C_{1} \cup C_{2}$．
+        やはり $C_{1} \cup C_{2}$ の選び方より，或る $C_{5} \in \Circuit$ が存在して
+        $y \in C_{5}$ かつ $C_{5} \subseteq \paren{C_{1} \cup C_{4}} \setmns \setprn{x}$ が成り立つ．
+      \decosep
+        ところが $C_{1} \cup C_{4} \subsetneq C_{1} \cup C_{2}$ より，この $C_{5}$ は
+        $y \in C_{5}$ かつ $C_{5} \subseteq \paren{C_{1} \cup C_{2}} \setmns \setprn{x}$ を満たし，矛盾．\qed
+      }
+      \plainpar{}{
+        さて，周公理を示そう．
+      }
+      \thmpar{周公理}{
+        $S$ を有限集合とする．
+        $\Circuit$ が或る $S$ 上のマトロイドの周族であるための必要十分条件は
+        \begin{align}
+          \tag{C1}&
+          \forallin{C_{1}|C_{2}}{\Circuit}{\lflimpl{C_{1} \neq C_{2}}{C_{1} \not\subseteq C_{2}}}
+        \\
+          \tag{C2}&
+          \forallin{C_{1}|C_{2}}{\Circuit}{\lflimpl{C_{1} \neq C_{2}}{
+            \forallin{z}{C_{1} \cap C_{2}}{\existsin{C_{3}}{\Circuit}{
+              C_{3} \subseteq \paren{C_{1} \cup C_{2}} \setmns \setprn{z}
+            }}
+          }}
+        \end{align}
+        である．
+      }
+      \proof{}{
+        \subproof{$\limpl$}{
+          補題\ref{lem:circuit-fundamental}\ref{lem:circuit-fundamental|6}および補題\ref{lem:C2}で既に示した．\qed
+        }
+        \subproof{$\backlimpl$}{
+          \eqref{axiom:C1}，\eqref{axiom:C2}を満たす $\Circuit \subseteq \Power{S}$ に対し，
+            \funcdomswidebox{\rho}{\Power{S}}{\setN}{A}{
+              \card{A} - \card{\setprnsep{a \in A}{\existsin{C}{\Circuit}{\lfland{a \in C}{C \subseteq A}}}}
+            }
+          で定義した $\rho$ が\eqref{axiom:R1}，\eqref{axiom:R2}，\eqref{axiom:R3}を満たすことを示せば，階数公理より十分である．
+        \decosep
+          まず\eqref{axiom:R1}：$\app{\rho}{\varnothing} = 0$ は明らか．
+        \decosep
+          次に\eqref{axiom:R2}：
+          $\forallsub{X}{S}{\forallin{y}{S}{\app{\rho}{X} \leq \app{\rho}{X \cup \setprn{y}} \leq \app{\rho}{X} + 1}}$
+          を示す．$X \subseteq S$ と $y \in S$ に対し，
+          \begin{itemize}
+          \item $y \in X$ のとき，自明．
+          \item $y \not\in X$ のとき，
+            \begin{align*}
+              \app{\rho}{X \cup \setprn{y}}
+                &= \card{X \cup \setprn{y}}
+                  - \card{\setprnsep{a \in X \cup \setprn{y}}{\existsin{C}{\Circuit}{\lfland{a \in C}{C \subseteq X \cup \setprn{y}}}}}
+            \end{align*}
+            であるから\remains
+          \end{itemize}
+        \decosep
+          最後に\eqref{axiom:R3}を示す．$X \subseteq S$ が
+            $\app{\rho}{X \cup \setprn{y}} = \app{\rho}{X \cup \setprn{z}} = \app{\rho}{X}$
+          を満たすとすると，$\rho$ の定義より
+          $y \in C_{1}$ かつ $C_{1} \subseteq X \cup \setprn{y}$ なる $C_{1} \in \Circuit$ と
+          $z \in C_{2}$ かつ $C_{2} \subseteq X \cup \setprn{z}$ なる $C_{2} \in \Circuit$ が
+          存在する．したがって
+          $\app{\rho}{X \cup \setprn{y} \cup \setprn{z}} = \app{\rho}{X}$ が成り立つ．\remains
+        \decosep
+          以上より，$\rho$ は\eqref{axiom:R1}，\eqref{axiom:R2}，\eqref{axiom:R3}を満たす．\remains\qed
+        }
+      }
+    % ---- ----
+\end{document}

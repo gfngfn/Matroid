@@ -1,0 +1,34 @@
+\begin{tikzpicture}
+  \coordinate (C1) at (-2, 0.5);
+  \coordinate (A1) at ($(C1) + (-150:0.7)$);
+  \coordinate (P1) at ($(C1) + (-135:0.4)$);
+  \coordinate (Q1) at ($(C1) + (-95:0.4)$);
+  \coordinate (B1) at ($(C1) + (-80:0.7)$);
+  \coordinate (C2) at (+2, 0.5);
+  \coordinate (A2) at ($(C2) + (-30:0.7)$);
+  \coordinate (P2) at ($(C2) + (-45:0.4)$);
+  \coordinate (Q2) at ($(C2) + (-85:0.4)$);
+  \coordinate (B2) at ($(C2) + (-100:0.7)$);
+  \draw[fill, gray!50] (-1, 0) circle[radius=2];
+  \draw[fill, white]   (+1, 0) circle[radius=2];
+  \draw[fill, white]   (C1) circle[x radius=0.5, y radius=1, rotate=-25];
+  \draw[fill, gray!50] (C2) circle[x radius=0.5, y radius=1, rotate=25];
+  \draw[fill, gray!50] (A1) .. controls (P1) and (Q1) .. (B1)
+    -- ($(B1) + (0, -0.5)$) -- ($(A1) + (0, -0.5)$) -- cycle;
+  \draw[fill, white]   (A2) .. controls (P2) and (Q2) .. (B2)
+    -- ($(B2) + (0, -0.5)$) -- ($(A2) + (0, -0.5)$) -- cycle;
+  \draw (-1, 0) circle[radius=2];
+  \draw (-2, -2) node[below] {$B_{1}$};
+  \draw (+1, 0) circle[radius=2];
+  \draw (+2, -2) node[below] {$B_{2}$};
+  \draw (C1) circle[x radius=0.5, y radius=1, rotate=-25];
+  \draw (C1) node[right=2pt, above] {$X'$};
+  \draw (A1) .. controls (P1) and (Q1) .. (B1);
+  \draw ($(A1)!0.5!(B1)$) node[below=1pt, left=-10pt] {$\setprn{x}$};
+  \draw (-3, 2.5) node (L1) {$X$};
+  \draw (L1) -- ($(C1) + (90:0.8)$);
+  \draw (C2) circle[x radius=0.5, y radius=1, rotate=25];
+  \draw (C2) node[left=2pt, above] {$Y'$};
+  \draw (A2) .. controls (P2) and (Q2) .. (B2);
+  \draw ($(A2)!0.5!(B2)$) node[below=1pt, right=-10pt] {$\setprn{y}$};
+\end{tikzpicture}

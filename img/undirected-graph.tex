@@ -1,0 +1,24 @@
+\def\defvertex#1#2#3#4{%
+  \draw[fill] #2 coordinate #1
+    circle[radius=2pt] node[#3] {#4}%
+}%
+\def\drawedge#1#2#3#4{
+  \draw #1 -- #2 node[#3] {#4}%
+}%
+\def\drawbend#1#2#3#4#5{
+  \draw #1 to[#4] node[#3] {#5} #2%
+}%
+\def\drawloopleft#1#2#3{%
+  \draw #1 ..controls ($#1 + (-1.5, 1.2)$) and ($#1 + (-1.5, -1.2)$) ..
+    node[#2] {#3} #1%
+}%
+\begin{tikzpicture}
+  \defvertex{(v1)}{(0, 0)}{above}{$v_{1}$};
+  \defvertex{(v2)}{(2, 0)}{above}{$v_{2}$};
+  \defvertex{(v3)}{(2, -2)}{below}{$v_{3}$};
+  \drawedge{(v1)}{(v2)}{midway, above}{$e_{1}$};
+  \drawbend{(v2)}{(v3)}{midway, right}{bend left=20pt}{$e_{2}$};
+  \drawbend{(v2)}{(v3)}{midway, left}{bend right=20pt}{$e_{3}$};
+  \drawbend{(v1)}{(v3)}{midway, left}{bend right=40pt}{$e_{4}$};
+  \drawloopleft{(v1)}{midway, left}{$e_{5}$};
+\end{tikzpicture}
