@@ -1,0 +1,25 @@
+\documentclass[leqno]{jsarticle}
+  \usepackage{docmute}
+  \input{settings}
+  \usepackage{style}
+  \author{\texttt{@bd\string_gfngfn}}
+  \title{マトロイド理論}
+\begin{document}
+  \maketitle
+  \setlength\parskip{0em}
+  \tableofcontents
+  \setlength\parskip{1em}
+  \section*{はじめに}
+    \plainpar{}{
+      この文書はおおよそ D. J. A. Welsh, \booktitle{Matroid Theory}の流れに基づいてマトロイドの理論を追ったものである．
+      記法は，\booktitle{Matroid Theory}で用いられているものにはできるだけ従っているが，
+      見通しをよくするために独自に拡張したり全く新しく定めたものもある．
+      また用語の日本語訳に於いてもこの文書で独自に定めた表現がある．
+      例えば``circuit''は単に「サーキット」と訳されることが多いが，この文書では「周」と訳している．
+      このほか数式表現における量化と論理演算は，
+      別行立てでは論理式に近い形式表現で，文中では自然言語によってそれぞれ表すようにしている．
+    }
+  \setcounter{section}{-1}
+  \include{matroid0}
+  \include{matroid1}
+\end{document}
