@@ -155,9 +155,9 @@
         を満たす束である．
       }
       \defpar{モジュラ束}{
-        束 $\Lat = \seqprn{L, \join, \meet}$ が\newwordjaen{モジュラ律}{modularity}すなわち
+        束 $\Lat = \seqprn{L, \join, \meet; \pord}$ が\newwordjaen{モジュラ律}{modularity}すなわち
         \begin{align}
-        \tag{\textsc{Mod}}
+        \tag{\textsc{Mod}}\label{axiom:mod}
           \forallin{x|y|z}{L}{\lflimpl{z \pord x}{x \meet \paren{y \join z} = \paren{x \meet y} \join z}}
         \end{align}
         を満たすとき，$\Lat$ を\newwordjaen{モジュラ束}{modular lattice}と呼ぶ．
@@ -165,7 +165,7 @@
       \defpar{半モジュラ束}{
         束 $\Lat = \seqprn{L, \join, \meet; \pord}$ が\newwordjaen{半モジュラ律}{semimodularity}すなわち
         \begin{align}
-        \tag{\textsc{SemiMod}}
+        \tag{\textsc{SemiMod}}\label{axiom:semimod}
           \forallin{x|y}{L}{
             \lflimpl{\lfland{x \meet y \covered x}{x \meet y \covered y}}{\lfland{x \covered x \join y}{y \covered x \join y}}
           }
@@ -174,6 +174,14 @@
       }
       \lempar{}{
         分配束はモジュラ束である．
+      }
+      \proof{}{
+        $\seqprn{L, \join, \meet; \pord}$ を分配束とする．$x, y, z \in L$ に対して $z \pord x$ が成り立つとすると，
+        束に於ける $\pord$ の定義より $x \meet z = z$ である．したがって分配律\eqref{axiom:meet-distr}より
+        \begin{align*}
+          x \meet \paren{y \join z} = \paren{x \meet y} \join \paren{x \meet z} = \paren{x \meet y} \join z
+        \end{align*}
+        であり，すなわちモジュラ律\eqref{axiom:mod}が成り立つから $\seqprn{L, \join, \meet; \pord}$ はモジュラ束．\qed
       }
       \lempar{}{
         モジュラ束は半モジュラ束である．
