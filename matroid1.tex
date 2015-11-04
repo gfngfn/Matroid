@@ -183,7 +183,7 @@
         $\Circuit$ が或る $S$ 上のマトロイドの周族であるための必要十分条件は
         \begin{align}
           \tag{C1}\label{axiom:C1}&
-          \forallin{C_{1}|C_{2}}{\Circuit}{\lflimpl{C_{1} \neq C_{2}}{C_{1} \not\subseteq C_{2}}}
+          \forallin{C_{1}|C_{2}}{\Circuit}{\lflimpl{C_{1} \subseteq C_{2}}{C_{1} = C_{2}}}
         \\
           \tag{C2}\label{axiom:C2}&
           \forallin{C_{1}|C_{2}}{\Circuit}{\lflimpl{C_{1} \neq C_{2}}{
@@ -779,7 +779,7 @@
       \lempar[lem:B1-no-proper-subset]{}{
         有限集合 $S$ と集合族 $\Base \subseteq \Power{S}$ が\eqref{axiom:B1}を満たすならば，
         \begin{align*}
-          &\forallin{B_{1}|B_{2}}{\Base}{\lflimpl{B_{1} \neq B_{2}}{B_{1} \not\subseteq B_{2}}}
+          &\forallin{B_{1}|B_{2}}{\Base}{\lflimpl{B_{1} \subseteq B_{2}}{B_{1} = B_{2}}}
         \end{align*}
         が成り立つ．すなわち，$\Base$ のどの $2$ 元も一方が他方を真に包むことはない．
       }
@@ -2308,7 +2308,7 @@
         $\Circuit$ が或る $S$ 上のマトロイドの周族であるための必要十分条件は
         \begin{align}
           \tag{C1}&
-          \forallin{C_{1}|C_{2}}{\Circuit}{\lflimpl{C_{1} \neq C_{2}}{C_{1} \not\subseteq C_{2}}}
+          \forallin{C_{1}|C_{2}}{\Circuit}{\lflimpl{C_{1} \subseteq C_{2}}{C_{1} = C_{2}}}
         \\
           \tag{C2}&
           \forallin{C_{1}|C_{2}}{\Circuit}{\lflimpl{C_{1} \neq C_{2}}{

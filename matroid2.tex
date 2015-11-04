@@ -1,0 +1,136 @@
+\documentclass[leqno]{jsarticle}
+\usepackage{style}
+\input{settings}
+\setcounter{section}{1}
+\begin{document}
+  \section{マトロイドの双対性}
+    \subsection{双対マトロイド}
+      \plainpar{}{
+        以下では，任意のマトロイドに対し，基族に関して双対なマトロイドが構成できることを示す．
+        まずはその根拠となる\eqref{axiom:B1}の双対に相当する補題を示しておこう．
+      }
+      \lempar[lem:dual-of-B1]{}{
+        マトロイド $M = \seqprn{S, \Indset}$ と $M$ の基族 $\Base$ に対し，
+        \begin{align*}
+          \forallin{B_{1}|B_{2}}{\Base}{\forallin{x}{B_{1} \setmns B_{2}}{\existsin{y}{B_{2} \setmns B_{1}}{
+            \paren{B_{2} \cup \setprn{x}} \setmns \setprn{y} \in \Base
+          }}}
+        \end{align*}
+        が成り立つ．
+      }
+      \proof{}{
+        \remains
+      }
+      \thmpar[thm:existence-of-dual-matroid]{}{
+        マトロイド $M = \seqprn{S, \Indset}$ の基族 $\Base$ に対し，
+        \begin{align*}
+          \Base^* \defeq \setprnsep{S \setmns B}{B \in \Base}
+        \end{align*}
+        で定義される $\Base^*$ を基族にもつ $S$ 上のマトロイド $M^*$ が一意的に存在する．
+      }
+      \proof{}{
+        $\Base^*$ が基公理を満たすことを示せばよい．
+      \decosep
+        \eqref{axiom:B0}：$\Base^* \neq \varnothing$ は
+        $\Base$ に関する\eqref{axiom:B0}：$\Base \neq \varnothing$ より明らかである．
+      \decosep
+        続いて\eqref{axiom:B1}，すなわち
+        \begin{align*}
+          \forallin{B^*_{1}|B^*_{2}}{\Base^*}{\forallin{x}{B^*_{1} \setmns B^*_{2}}{\forallin{y}{B^*_{2} \setmns B^*_{1}}{
+            \paren{B^*_{1} \cup \setprn{y}} \setmns \setprn{x} \in \Base^*
+          }}}
+        \end{align*}
+        が成り立つことを示す．$B^*_{1}, B^*_{2} \in \Base^*$ に対して
+        $B_{1} \defeq S \setmns B^*_{1}$，$B_{2} \defeq S \setmns B^*_{2}$ とおくと，$\Base^*$ の定義より
+        $B_{1} \in \Base$，$B_{2} \in \Base$ である．
+        このとき，補題\ref{lem:dual-of-B1}より
+        任意の $x \in B_{2} \setmns B_{1}$ に対して或る $y \in B_{1} \setmns B_{2}$ が存在して
+        $\paren{B_{1} \cup \setprn{x}} \setmns \setprn{y} \in \Base$ が成り立つ．ここで
+        $B_{2} \setmns B_{1} = \paren{S \setmns B^*_{2}} \setmns \paren{S \setmns B^*_{1}} = B^*_{1} \setmns B^*_{2}$，
+        同様に $B_{1} \setmns B_{2} = B^*_{2} \setmns B^*_{1}$，さらに
+        \begin{align*}
+          \paren{B_{1} \cup \setprn{x}} \setmns \setprn{y} \in \Base
+            &\iff S \setmns \paren{\paren{B_{1} \cup \setprn{x}} \setmns \setprn{y}} \in \Base^*
+          \\&\iff \paren{\paren{S \setmns B_{1}} \setmns \setprn{x}} \cup \setprn{y} \in \Base^*
+          \\&\iff \paren{B^*_{1} \cup \setprn{y}} \setmns \setprn{x} \in \Base^*
+        \end{align*}
+        であるから，結局任意の $x \in B^*_{1} \setmns B^*_{2}$ に対して或る $y \in B^*_{2} \setmns B^*_{1}$ が存在して
+        $\paren{B^*_{1} \cup \setprn{y}} \setmns \setprn{x} \in \Base^*$，
+        すなわち\eqref{axiom:B1}が $\Base^*$ に関して成り立つ．
+      \decosep
+        以上より $\Base^*$ は\eqref{axiom:B0}，\eqref{axiom:B1}を満たし，或る $S$ 上のマトロイド $M^*$ の基族である．\qed
+      }
+      \defpar{}{
+        マトロイド $M = \seqprn{S, \Indset}$ に対し，
+        定理\ref{thm:existence-of-dual-matroid}で一意的存在が示されるマトロイド $M^* = \seqprn{S, \Indset^*}$ を
+        $M$ の\newwordjaen{双対マトロイド}{dual matroid}と呼ぶ．
+      }
+      \thmpar{階数函数の双対性}{
+        マトロイド $M = \seqprn{S, \Indset}$ と $M$ の双対マトロイド $M^* = \seqprn{S, \Indset^*}$ に対し，
+        各々の階数函数を $\rho$，$\rho^*$ とおくと，
+        \begin{align*}
+          \forallsub{A}{S}{\app{\rho^*}{A} = \card{A} - \app{\rho}{S} + \app{\rho}{S \setmns A}}
+        \end{align*}
+        が成り立つ．
+      }
+    \subsection{超平面}{
+      \defpar{超平面族，超平面}{
+        マトロイド $M = \seqprn{S, \Indset}$ の平坦族 $\Flat$ に対し，
+        \begin{align*}
+          \Hypln \defeq \maxl \paren{\Flat \setmns \setprn{S}}
+        \end{align*}
+        で定義される $\Hypln \subseteq \Power{S}$ を $M$ の\newwordjaen{超平面族}{hyperplane family}と呼び，
+        $\Hypln$ の各元を $M$ の\newwordjaen{超平面}{hyperplane}と呼ぶ．
+      }
+      \lempar{}{
+        マトロイド $M = \seqprn{S, \Indset}$ の階数函数を $\rho$，平坦族を $\Flat$，超平面族を $\Hypln$ とおくと，
+        \begin{align*}
+          \forallin{F_{1}|F_{2}}{\Flat}{\lflimpl{\lfland{F_{1} \subseteq F_{2}}{\app{\rho}{F_{1}} + 1 = \app{\rho}{F_{2}}}}{
+            \existsin{H}{\Hypln}{F_{1} = F_{2} \cap H}
+          }}
+        \end{align*}
+        が成り立つ．
+      }
+      \proof{}{
+        \remains
+      }
+      \thmpar{}{
+        マトロイド $M = \seqprn{S, \Indset}$ の平坦族を $\Flat$，超平面族を $\Hypln$ とおくと，
+        \begin{align*}
+          \forallin{F}{\Flat \setmns \setprn{S}}{\existssub{\Hypln'}{\Hypln}{
+            \lfland{\card{\Hypln'} = \app{\rho}{S} - \app{\rho}{F}}{\bigcap \Hypln' = F}
+          }}
+        \end{align*}
+        が成り立つ．
+      }
+      \proof{}{
+        \remains
+      }
+    }
+    \thmpar{超平面と餘周の相補性}{
+      マトロイド $M = \seqprn{S, \Indset}$ の超平面族を $\Hypln$，
+      $M$ の双対マトロイド $M^*$ の周族を $\Circuit^*$ とおくと，
+      \begin{align*}
+        \forallsub{X}{S}{\lflimpleqv{X \in \Hypln}{S \setmns X \in \Circuit^*}}
+      \end{align*}
+      が成り立つ．すなわち超平面の補集合は餘周であり，餘周の補集合は超平面である．
+    }
+    \proof{}{
+      \remains
+    }
+    \thmpar{超平面公理}{
+      集合族 $\Hypln \subseteq \Power{S}$ が或る $S$ 上のマトロイドの超平面族であることと，
+      \begin{align*}
+      \tag{H1}\label{axiom:H1}
+        \forallin[1]{H_{1}|H_{2}}{\Hypln}{\lflimpl{H_{1} \subseteq H_{2}}{H_{1} = H_{2}}}
+      \\
+      \tag{H2}\label{axiom:H2}
+        \forallin[1]{H_{1}|H_{2}}{\Hypln}{\lflimpl{H_{1} \neq H_{2}}{
+          \forallin{x}{S \setmns \paren{H_{1} \cup H_{2}}}{\existsin{H_{3}}{\Hypln}{
+            \paren{H_{1} \cap H_{2}} \cup \setprn{x} \in H_{3}
+          }}
+        }}
+      \end{align*}
+      を満たすことは同値である．
+    }
+\end{document}
